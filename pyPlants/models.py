@@ -105,7 +105,7 @@ class Plant(AbstractPlantModel):
     fertilizer = models.BooleanField(default=False)
     fertilizer_season = models.CharField(
         max_length=20,
-        choices=Seasons.spring_autumn_choices,
+        choices=Seasons.choices,
         blank=True,
         null=True,
     )
@@ -113,7 +113,7 @@ class Plant(AbstractPlantModel):
     repotting = models.BooleanField(default=False)
     repotting_season = models.CharField(
         max_length=20,
-        choices=Seasons.spring_autumn_choices,
+        choices=Seasons.choices,
         blank=True,
         null=True,
     )
@@ -178,12 +178,12 @@ class Plant(AbstractPlantModel):
 
     def should_repot(self):
         if self.repotting:
-            next_repot_date = self.next_repot_date()
+            next_repot_date = self.get_next_repotting_date()
             if next_repot_date:
                 return date.today() >= next_repot_date
         return False
 
-    def next_repot_date(self):
+    def get_next_repotting_date(self):
         if self.repotting:
             season_manager = SeasonManager()
             return season_manager.get_next_or_current_season_start_date(
