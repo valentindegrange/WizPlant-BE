@@ -49,6 +49,11 @@ In a new terminal window, run the celery worker:
 ```bash
 python -m celery -A pyPlants worker -l info
 ```
+### 7. Seed the database
+To seed the database with some data, run:
+```bash
+python manage.py gen_db
+```
 
 The application will be accessible at http://127.0.0.1:8000/. The admin interface can be accessed at http://127.0.0.1:8000/admin/ using the superuser credentials created earlier.
 
