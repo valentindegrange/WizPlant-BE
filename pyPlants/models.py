@@ -141,9 +141,11 @@ class Notification(models.Model):
     message = models.TextField()
     date = models.DateField(auto_now_add=True)
     viewed = models.BooleanField(default=False)
+    viewed_at = models.DateTimeField(null=True, blank=True)
 
     def mark_as_viewed(self):
         self.viewed = True
+        self.viewed_at = datetime.now()
         self.save()
 
 
