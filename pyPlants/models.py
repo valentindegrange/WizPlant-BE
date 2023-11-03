@@ -1,10 +1,53 @@
 from datetime import datetime, date, timedelta
 
-from django.contrib.auth.models import User
+from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
+from django.contrib.auth.models import User, PermissionsMixin
 from django.db import models
+from django.utils import timezone
 
 from .constants import Seasons
 from .season_manager import SeasonManager
+
+
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError('The Email field must be set')
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+
+        return self.create_user(email, password, **extra_fields)
+
+
+class PlantUser(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(unique=True)
+    is_staff = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+    date_joined = models.DateTimeField(default=timezone.now)
+
+    objects = CustomUserManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    def save(self, *args, **kwargs):
+        # Your custom logic here
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.email
 
 
 class Plant(models.Model):
@@ -25,7 +68,7 @@ class Plant(models.Model):
     name = models.CharField(max_length=50)
     description = models.TextField(null=True, blank=True)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(PlantUser, on_delete=models.CASCADE)
 
     # Sunlight
     sunlight = models.CharField(
@@ -137,7 +180,7 @@ class Plant(models.Model):
 
 
 class Notification(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(PlantUser, on_delete=models.CASCADE)
     message = models.TextField()
     date = models.DateField(auto_now_add=True)
     viewed = models.BooleanField(default=False)
@@ -150,7 +193,7 @@ class Notification(models.Model):
 
 
 class NotificationCenter(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(PlantUser, on_delete=models.CASCADE)
     enable_email_notifications = models.BooleanField(default=False)
     enable_sms_notifications = models.BooleanField(default=False)
     preferred_notification_hour = models.IntegerField(default=9)
