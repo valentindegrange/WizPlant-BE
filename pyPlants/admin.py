@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Plant, NotificationCenter
+from pyPlants.models import Plant, NotificationCenter, Notification
 
 
 class NotificationCenterAdmin(admin.ModelAdmin):
@@ -21,5 +21,12 @@ class PlantAdmin(admin.ModelAdmin):
     list_filter = ['last_watered', 'last_fertilized', 'last_repotted']
 
 
+class NotificationAdmin(admin.ModelAdmin):
+    list_display = ('pk', 'user', 'message', 'date', 'viewed')
+    search_fields = ['user', 'message']
+    list_filter = ['date', 'viewed']
+
+
 admin.site.register(Plant, PlantAdmin)
 admin.site.register(NotificationCenter, NotificationCenterAdmin)
+admin.site.register(Notification, NotificationAdmin)

@@ -136,9 +136,28 @@ class Plant(models.Model):
         return None
 
 
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    message = models.TextField()
+    date = models.DateField(auto_now_add=True)
+    viewed = models.BooleanField(default=False)
+
+    def mark_as_viewed(self):
+        self.viewed = True
+        self.save()
+
+
 class NotificationCenter(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     enable_email_notifications = models.BooleanField(default=False)
     enable_sms_notifications = models.BooleanField(default=False)
     preferred_notification_hour = models.IntegerField(default=9)
     last_notification_sent = models.DateField(null=True, blank=True)
+
+    def send_message(self, message):
+        # very simple implementation for now
+        print('New notification!')
+        notification = Notification.objects.create(user=self.user, message=message)
+        print(f'({notification.user.username}) {notification.date}: {notification.message}')
+        self.last_notification_sent = date.today()
+        self.save()
