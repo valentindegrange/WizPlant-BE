@@ -27,7 +27,6 @@ class SeasonManager:
         for season, dates in self.seasons.items():
             if self.date_in_season(date, season):
                 return season
-        return None
 
     def get_half_year(self, date):
         """Returns the half year season (WINTER or SUMMER) for a given date"""

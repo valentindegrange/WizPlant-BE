@@ -104,6 +104,7 @@ class PlantTest(TestCase):
         self.assertTrue(self.plant_only_water.should_fertilize())
 
     def test_next_fertilize_date(self):
+        self.assertIsNone(self.plant_only_water.get_next_fertilize_date())
         # winter
         # fertilize in winter, during winter
         with freeze_time('2023-1-1'):
@@ -234,6 +235,7 @@ class PlantTest(TestCase):
         self.assertTrue(self.plant_only_water.should_repot())
 
     def test_next_repotting_date(self):
+        self.assertIsNone(self.plant_only_water.get_next_repotting_date())
         # winter
         # repot in winter, during winter
         with freeze_time('2023-1-1'):

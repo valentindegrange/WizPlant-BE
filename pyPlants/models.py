@@ -207,13 +207,13 @@ class Notification(AbstractPlantModel):
         default=NotificationType.IN_APP,
     )
     sent = models.BooleanField(default=False)
-    sent_at = models.DateField(auto_now_add=True)
+    sent_at = models.DateTimeField(auto_now_add=True)
     viewed = models.BooleanField(default=False)
     viewed_at = models.DateTimeField(null=True, blank=True)
 
     def mark_as_viewed(self):
         self.viewed = True
-        self.viewed_at = datetime.now()
+        self.viewed_at = timezone.now()
         self.save()
 
 
@@ -222,7 +222,7 @@ class NotificationCenter(AbstractPlantModel):
     enable_email_notifications = models.BooleanField(default=False)
     enable_sms_notifications = models.BooleanField(default=False)
     preferred_notification_hour = models.IntegerField(default=9)
-    last_notification_sent = models.DateField(null=True, blank=True)
+    last_notification_sent = models.DateTimeField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if self.pk is None:
@@ -234,5 +234,6 @@ class NotificationCenter(AbstractPlantModel):
         logger.info('New notification!')
         notification = Notification.objects.create(user=self.user, message=message)
         logger.info(f'({notification.user.email}) {notification.sent_at}: {notification.message}')
-        self.last_notification_sent = date.today()
+        self.last_notification_sent = timezone.now()
         self.save()
+        return notification
