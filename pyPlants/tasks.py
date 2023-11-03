@@ -1,32 +1,32 @@
 from celery import shared_task
-from django.contrib.auth.models import User
 
-from pyPlants.models import Plant, NotificationCenter
+from pyPlants.models import PlantUser, Plant, NotificationCenter
 
 
 @shared_task
 def check_plants(user_id):
-    user = User.objects.get(id=user_id)
+    user = PlantUser.objects.get(id=user_id)
     notification_center = NotificationCenter.objects.get(user=user)
     plants = Plant.objects.filter(user=user)
 
-    actions = list()
+    actions = dict(
+        water=list(),
+        repot=list(),
+        fertilize=list(),
+    )
 
     for plant in plants:
-        action = dict(plant=plant.name, actions=list())
         if plant.should_water():
-            action['actions'].append('water')
+            actions['water'].append(plant.name)
         if plant.should_fertilize():
-            action['actions'].append('fertilize')
+            actions['fertilize'].append(plant.name)
         if plant.should_repot():
-            action['actions'].append('repot')
+            actions['repot'].append(plant.name)
 
-        if action['actions']:
-            actions.append(action)
-
-    if actions:
+    if actions['water'] or actions['fertilize'] or actions['repot']:
         # wrap this up based on the notification preferences
-        message = f'Hey {user.username}, it seems you have some plants that need your attention! See below:\n'
-        for action in actions:
-            message += f'Your {action["plant"]} needs you to {", ".join(action["actions"])}.\n'
-        notification_center.send_message(message)
+        message = f'Hey {user.email}, it seems you have some plants that need your attention! See below:\n'
+        for key, values in actions.items():
+            if values:
+                message += f'You need to {key}: {", ".join(values)}.\n'
+        notification_center.send_notification(message)
