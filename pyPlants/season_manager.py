@@ -1,5 +1,10 @@
 import datetime
+import logging
+
 from .constants import Seasons
+
+
+logger = logging.getLogger(__name__)
 
 
 class SeasonManager:
@@ -10,7 +15,6 @@ class SeasonManager:
             Seasons.AUTUMN: dict(start=(9, 22), end=(12, 20)),
             Seasons.WINTER: dict(start=(12, 21), end=(3, 19))
         }
-
         self.half_years = {
             Seasons.SPRING: Seasons.SUMMER,
             Seasons.SUMMER: Seasons.SUMMER,
@@ -24,6 +28,10 @@ class SeasonManager:
             if self.date_in_season(date, season):
                 return season
         return None
+
+    def get_half_year(self, date):
+        """Returns the half year season (WINTER or SUMMER) for a given date"""
+        return self.half_years[self.get_season(date)]
 
     def date_in_season(self, date: datetime.date, season):
         """Returns True if the date is in the given season"""
@@ -40,18 +48,29 @@ class SeasonManager:
 
     def get_start_date_of_current_or_next_seasons(self, date: datetime.date, season):
         """Given a date and a season, returns the start date of the season (current or next)"""
-        if season not in self.seasons.keys():
+        if season not in self.seasons:
             raise ValueError("Invalid season")
-        if self.date_in_season(date, season):
-            year = date.year
+        current_year = date.year
+        start_month, start_day = self.seasons[season]['start']
+        end_month, end_day = self.seasons[season]['end']
+        if season == Seasons.WINTER:
+            season_start_date = datetime.date(current_year - 1, start_month, start_day)
+            season_end_date = datetime.date(current_year, end_month, end_day)
+            next_season_start_date = datetime.date(current_year, start_month, start_day)
         else:
-            year = date.year + 1
-
-        return datetime.date(year, self.seasons[season]['start'][0], self.seasons[season]['start'][1])
+            season_start_date = datetime.date(current_year, start_month, start_day)
+            season_end_date = datetime.date(current_year, end_month, end_day)
+            next_season_start_date = datetime.date(current_year + 1, start_month, start_day)
+        if season_start_date <= date <= season_end_date:
+            return season_start_date
+        if date < season_start_date:
+            return season_start_date
+        if date > season_end_date:
+            return next_season_start_date
 
     def get_start_date_of_target_season(self, date: datetime.date, season):
         """
-        Given a start date and a target season, returns the start date of the target season
+        Given a date and a target season, returns the start date of the target season
         in the current or next year.
         """
         if season not in self.seasons:
@@ -93,6 +112,3 @@ class SeasonManager:
     def get_current_half_year(self):
         """Returns the current half year"""
         return self.half_years[self.get_current_season()]
-
-    def get_half_year(self, date):
-        return self.half_years[self.get_season(date)]

@@ -11,6 +11,8 @@ django-extensions = "*"
 celery = "*"
 django-celery-beat = "*"
 redis = "*"
+freezegun = "*"
+coverage = "*"
 
 [dev-packages]
 

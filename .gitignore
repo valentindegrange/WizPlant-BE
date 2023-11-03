@@ -3,3 +3,4 @@ db.sqlite3
 /.idea/*
 /images/*
 celerybeat-schedule.db
+/.coverage

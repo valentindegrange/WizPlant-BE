@@ -10,8 +10,3 @@ class Seasons:
         (AUTUMN, AUTUMN),
         (WINTER, WINTER),
     )
-
-    spring_autumn_choices = (
-        (SPRING, SPRING),
-        (AUTUMN, AUTUMN),
-    )
