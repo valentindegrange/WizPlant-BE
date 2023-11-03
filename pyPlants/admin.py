@@ -1,6 +1,12 @@
 from django.contrib import admin
 
-from pyPlants.models import Plant, NotificationCenter, Notification
+from pyPlants.models import PlantUser, Plant, NotificationCenter, Notification
+
+
+class PlantUserAdmin(admin.ModelAdmin):
+    list_display = ('id', 'email', 'is_staff', 'is_superuser')
+    search_fields = ['email']
+    list_filter = ['is_staff', 'is_superuser']
 
 
 class NotificationCenterAdmin(admin.ModelAdmin):
@@ -22,11 +28,12 @@ class PlantAdmin(admin.ModelAdmin):
 
 
 class NotificationAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'user', 'message', 'date', 'viewed')
+    list_display = ('pk', 'user', 'message', 'notification_type', 'sent', 'viewed', 'sent_at', 'viewed_at')
     search_fields = ['user', 'message']
-    list_filter = ['date', 'viewed']
+    list_filter = ['sent', 'viewed']
 
 
+admin.site.register(PlantUser, PlantUserAdmin)
 admin.site.register(Plant, PlantAdmin)
 admin.site.register(NotificationCenter, NotificationCenterAdmin)
 admin.site.register(Notification, NotificationAdmin)

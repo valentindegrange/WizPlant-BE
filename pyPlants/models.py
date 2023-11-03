@@ -4,9 +4,21 @@ from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.contrib.auth.models import User, PermissionsMixin
 from django.db import models
 from django.utils import timezone
+from logging import getLogger
 
-from .constants import Seasons
-from .season_manager import SeasonManager
+from pyPlants.constants import Seasons
+from pyPlants.season_manager import SeasonManager
+from pyPlants.task_scheduler import schedule_check_plant_task
+
+logger = getLogger(__name__)
+
+
+class AbstractPlantModel(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
 
 
 class CustomUserManager(BaseUserManager):
@@ -31,8 +43,9 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(email, password, **extra_fields)
 
 
-class PlantUser(AbstractBaseUser, PermissionsMixin):
+class PlantUser(AbstractBaseUser, PermissionsMixin, AbstractPlantModel):
     email = models.EmailField(unique=True)
+    phone_number = models.CharField(max_length=20, null=True, blank=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(default=timezone.now)
@@ -50,7 +63,7 @@ class PlantUser(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 
-class Plant(models.Model):
+class Plant(AbstractPlantModel):
     class EarthMoistureOptions(models.TextChoices):
         LIGHTLY_DRY = 'LIGHTLY_DRY', 'Lightly Dry'
         DRY = 'DRY', 'Dry'
@@ -179,10 +192,22 @@ class Plant(models.Model):
         return None
 
 
-class Notification(models.Model):
+class NotificationType(models.TextChoices):
+    EMAIL = 'EMAIL', 'Email'
+    SMS = 'SMS', 'SMS'
+    IN_APP = 'IN_APP', 'In-App'
+
+
+class Notification(AbstractPlantModel):
     user = models.ForeignKey(PlantUser, on_delete=models.CASCADE)
     message = models.TextField()
-    date = models.DateField(auto_now_add=True)
+    notification_type = models.CharField(
+        max_length=20,
+        choices=NotificationType.choices,
+        default=NotificationType.IN_APP,
+    )
+    sent = models.BooleanField(default=False)
+    sent_at = models.DateField(auto_now_add=True)
     viewed = models.BooleanField(default=False)
     viewed_at = models.DateTimeField(null=True, blank=True)
 
@@ -192,17 +217,22 @@ class Notification(models.Model):
         self.save()
 
 
-class NotificationCenter(models.Model):
+class NotificationCenter(AbstractPlantModel):
     user = models.OneToOneField(PlantUser, on_delete=models.CASCADE)
     enable_email_notifications = models.BooleanField(default=False)
     enable_sms_notifications = models.BooleanField(default=False)
     preferred_notification_hour = models.IntegerField(default=9)
     last_notification_sent = models.DateField(null=True, blank=True)
 
-    def send_message(self, message):
+    def save(self, *args, **kwargs):
+        if self.pk is None:
+            schedule_check_plant_task(self)
+        super().save(*args, **kwargs)
+
+    def send_notification(self, message):
         # very simple implementation for now
-        print('New notification!')
+        logger.info('New notification!')
         notification = Notification.objects.create(user=self.user, message=message)
-        print(f'({notification.user.username}) {notification.date}: {notification.message}')
+        logger.info(f'({notification.user.email}) {notification.sent_at}: {notification.message}')
         self.last_notification_sent = date.today()
         self.save()
