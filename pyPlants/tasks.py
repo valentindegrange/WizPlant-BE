@@ -1,6 +1,12 @@
+import logging
+
 from celery import shared_task
 
 from pyPlants.models import PlantUser, Plant, NotificationCenter
+from pyPlants.notification_manager.service import NotificationManager
+from pyPlants.data_classes.action_plant import ActionPlant
+
+logger = logging.getLogger(__name__)
 
 
 @shared_task
@@ -9,24 +15,17 @@ def check_plants(user_id):
     notification_center = NotificationCenter.objects.get(user=user)
     plants = Plant.objects.filter(user=user)
 
-    actions = dict(
-        water=list(),
-        repot=list(),
-        fertilize=list(),
-    )
+    plant_action = ActionPlant()
 
     for plant in plants:
         if plant.should_water():
-            actions['water'].append(plant.name)
+            plant_action.add_water(plant)
         if plant.should_fertilize():
-            actions['fertilize'].append(plant.name)
+            plant_action.add_fertilize(plant)
         if plant.should_repot():
-            actions['repot'].append(plant.name)
+            plant_action.add_repot(plant)
 
-    if actions['water'] or actions['fertilize'] or actions['repot']:
-        # wrap this up based on the notification preferences
-        message = f'Hey {user.email}, it seems you have some plants that need your attention! See below:\n'
-        for key, values in actions.items():
-            if values:
-                message += f'You need to {key}: {", ".join(values)}.\n'
-        notification_center.send_notification(message)
+    if not plant_action.is_empty():
+        notification_manager = NotificationManager(notification_center=notification_center, plant_action=plant_action)
+        notifications = notification_manager.send_notifications()
+        logger.info(f'{len(notifications)} Notifications sent!\nDetails:\n{notifications}')
