@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "28f9962d6c8d9fa597877be189ed864daaefc043e400d833c4bf10c01e734905"
+            "sha256": "06891d47ce182713619d96b6e1903e8d8ab700c08e091f4ea4bdba37dc4e567a"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -194,6 +194,15 @@
             "markers": "python_version >= '3.6'",
             "version": "==3.2.3"
         },
+        "django-filter": {
+            "hashes": [
+                "sha256:015fe155582e1805b40629344e4a6cf3cc40450827d294d040b4b8c1749a9fa6",
+                "sha256:65bc5d1d8f4fff3aaf74cb5da537b6620e9214fb4b3180f6c560776b1b6dccd0"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.7'",
+            "version": "==23.3"
+        },
         "django-timezone-field": {
             "hashes": [
                 "sha256:916d0fd924443462f099f02122cc38d6a6e901ea17f1206c343836199df8bc49",
@@ -252,6 +261,15 @@
             ],
             "markers": "python_version >= '3.8'",
             "version": "==5.3.3"
+        },
+        "markdown": {
+            "hashes": [
+                "sha256:5874b47d4ee3f0b14d764324d2c94c03ea66bee56f2d929da9f2508d65e722dc",
+                "sha256:b65d7beb248dc22f2e8a31fb706d93798093c308dc1aba295aedeb9d41a813bd"
+            ],
+            "index": "pypi",
+            "markers": "python_version >= '3.8'",
+            "version": "==3.5.1"
         },
         "matplotlib-inline": {
             "hashes": [
