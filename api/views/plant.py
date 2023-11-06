@@ -10,7 +10,7 @@ from pyPlants.models import Plant
 class PlantModelViewSet(viewsets.ModelViewSet):
     serializer_class = PlantSerializer
     filter_backends = [dj_filters.DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ('name',)
+    filterset_fields = ('name', 'fertilizer', 'repotting')
     search_fields = ('name', 'description')
     ordering_fields = '__all__'
     ordering = ['last_watered']
@@ -27,11 +27,17 @@ class PlantModelViewSet(viewsets.ModelViewSet):
     @action(methods=['post'], detail=True)
     def fertilize(self, request, pk=None):
         plant = self.get_object()
-        plant.fertilize()
-        return Response(status=status.HTTP_200_OK)
+        try:
+            plant.fertilize()
+            return Response(status=status.HTTP_200_OK)
+        except ValueError as err:
+            return Response(data={'error': str(err)}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['post'], detail=True)
     def repot(self, request, pk=None):
         plant = self.get_object()
-        plant.repot()
-        return Response(status=status.HTTP_200_OK)
+        try:
+            plant.repot()
+            return Response(status=status.HTTP_200_OK)
+        except ValueError as err:
+            return Response(data={'error': str(err)}, status=status.HTTP_400_BAD_REQUEST)
