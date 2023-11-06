@@ -106,9 +106,12 @@ class Plant(AbstractPlantModel):
     water_frequency_summer = models.IntegerField()
     water_frequency_winter = models.IntegerField()
     last_watered = models.DateField(null=True, blank=True)
+    should_water = models.BooleanField(default=False)
+    next_water_date = models.DateField(null=True, blank=True)
+
     leaf_mist = models.BooleanField(default=False)
 
-    # Soil
+    # fertilize
     fertilizer = models.BooleanField(default=False)
     fertilizer_season = models.CharField(
         max_length=20,
@@ -117,6 +120,9 @@ class Plant(AbstractPlantModel):
         null=True,
     )
     last_fertilized = models.DateField(null=True, blank=True)
+    should_fertilize = models.BooleanField(default=False)
+    next_fertilize_date = models.DateField(null=True, blank=True)
+    # repot
     repotting = models.BooleanField(default=False)
     repotting_season = models.CharField(
         max_length=20,
@@ -125,6 +131,8 @@ class Plant(AbstractPlantModel):
         null=True,
     )
     last_repotted = models.DateField(null=True, blank=True)
+    should_repot = models.BooleanField(default=False)
+    next_repotting_date = models.DateField(null=True, blank=True)
 
     # other
     extra_tips = models.TextField(null=True, blank=True)
@@ -136,15 +144,15 @@ class Plant(AbstractPlantModel):
         self.last_watered = date.today()
         self.save()
 
-    def should_water(self):
-        if self.last_watered is None:
-            return True
-        else:
-            return date.today() >= self.next_water_date()
+    def get_should_water(self):
+        should_water = date.today() >= self.get_next_water_date()
+        self.should_water = should_water
+        self.save()
+        return should_water
 
-    def next_water_date(self):
+    def get_next_water_date(self):
         if self.last_watered is None:
-            return date.today()
+            next_water_date = date.today()
         else:
             season_manager = SeasonManager()
             half_year_season = season_manager.get_half_year(date=self.last_watered)
@@ -152,7 +160,10 @@ class Plant(AbstractPlantModel):
                 water_frequency = self.water_frequency_summer
             else:
                 water_frequency = self.water_frequency_winter
-            return self.last_watered + timedelta(days=water_frequency)
+            next_water_date = self.last_watered + timedelta(days=water_frequency)
+        self.next_water_date = next_water_date
+        self.save()
+        return next_water_date
 
     def fertilize(self):
         if self.fertilizer:
@@ -161,20 +172,26 @@ class Plant(AbstractPlantModel):
         else:
             raise ValueError("This plant does not require fertilizer.")
 
-    def should_fertilize(self):
+    def get_should_fertilize(self):
+        should_fertilize = False
         if self.fertilizer:
             next_fertilize_date = self.get_next_fertilize_date()
             if next_fertilize_date:
-                return date.today() >= next_fertilize_date
-        return False
+                should_fertilize = date.today() >= next_fertilize_date
+        self.should_fertilize = should_fertilize
+        self.save()
+        return should_fertilize
 
     def get_next_fertilize_date(self):
+        next_fertilize_date = None
         if self.fertilizer:
             season_manager = SeasonManager()
-            return season_manager.get_next_or_current_season_start_date(
+            next_fertilize_date = season_manager.get_next_or_current_season_start_date(
                 season=self.fertilizer_season, date=self.last_fertilized
             )
-        return None
+        self.next_fertilize_date = next_fertilize_date
+        self.save()
+        return next_fertilize_date
 
     def repot(self):
         if self.repotting:
@@ -183,20 +200,26 @@ class Plant(AbstractPlantModel):
         else:
             raise ValueError("This plant does not require repotting.")
 
-    def should_repot(self):
+    def get_should_repot(self):
+        should_repot = False
         if self.repotting:
             next_repot_date = self.get_next_repotting_date()
             if next_repot_date:
-                return date.today() >= next_repot_date
-        return False
+                should_repot = date.today() >= next_repot_date
+        self.should_repot = should_repot
+        self.save()
+        return should_repot
 
     def get_next_repotting_date(self):
+        next_repotting_date = None
         if self.repotting:
             season_manager = SeasonManager()
-            return season_manager.get_next_or_current_season_start_date(
+            next_repotting_date = season_manager.get_next_or_current_season_start_date(
                 season=self.repotting_season, date=self.last_repotted
             )
-        return None
+        self.next_repotting_date = next_repotting_date
+        self.save()
+        return next_repotting_date
 
 
 class NotificationType(models.TextChoices):

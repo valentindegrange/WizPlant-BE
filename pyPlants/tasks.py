@@ -18,11 +18,11 @@ def check_plants(user_id):
     plant_action = ActionPlant()
 
     for plant in plants:
-        if plant.should_water():
+        if plant.get_should_water():
             plant_action.add_water(plant)
-        if plant.should_fertilize():
+        if plant.get_should_fertilize():
             plant_action.add_fertilize(plant)
-        if plant.should_repot():
+        if plant.get_should_repot():
             plant_action.add_repot(plant)
 
     if not plant_action.is_empty():

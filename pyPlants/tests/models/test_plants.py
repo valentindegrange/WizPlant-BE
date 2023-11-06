@@ -26,50 +26,50 @@ class PlantTest(TestCase):
 
     def test_should_not_water(self):
         self.plant_only_water.water()
-        self.assertFalse(self.plant_only_water.should_water())
+        self.assertFalse(self.plant_only_water.get_should_water())
 
     def test_should_water(self):
-        self.assertTrue(self.plant_only_water.should_water())
+        self.assertTrue(self.plant_only_water.get_should_water())
 
     def test_should_water_summer(self):
         with freeze_time('2023-6-1'):
             self.plant_only_water.water()
         with freeze_time('2023-6-8'):
-            self.assertTrue(self.plant_only_water.should_water())
+            self.assertTrue(self.plant_only_water.get_should_water())
 
     def test_should_water_winter(self):
         with freeze_time('2023-1-1'):
             self.plant_only_water.water()
         with freeze_time('2023-1-15'):
-            self.assertTrue(self.plant_only_water.should_water())
+            self.assertTrue(self.plant_only_water.get_should_water())
 
     def test_not_should_water_summer(self):
         with freeze_time('2023-6-1'):
             self.plant_only_water.water()
         with freeze_time('2023-6-7'):
-            self.assertFalse(self.plant_only_water.should_water())
+            self.assertFalse(self.plant_only_water.get_should_water())
 
     def test_not_should_water_winter(self):
         with freeze_time('2023-1-1'):
             self.plant_only_water.water()
         with freeze_time('2023-1-14'):
-            self.assertFalse(self.plant_only_water.should_water())
+            self.assertFalse(self.plant_only_water.get_should_water())
 
     def test_next_water_date(self):
         # not watered yet
         with freeze_time('2023-1-1'):
             today = date.today()
-            self.assertEqual(self.plant_only_water.next_water_date(), today)
+            self.assertEqual(self.plant_only_water.get_next_water_date(), today)
         # water in winter
         with freeze_time('2023-1-1'):
             self.plant_only_water.water()
             dt = date.today() + timedelta(days=14)
-            self.assertEqual(self.plant_only_water.next_water_date(), dt)
+            self.assertEqual(self.plant_only_water.get_next_water_date(), dt)
         # water in summer
         with freeze_time('2023-6-1'):
             self.plant_only_water.water()
             dt = date.today() + timedelta(days=7)
-            self.assertEqual(self.plant_only_water.next_water_date(), dt)
+            self.assertEqual(self.plant_only_water.get_next_water_date(), dt)
 
     def test_fertilize(self):
         self.assertRaises(ValueError, self.plant_only_water.fertilize)
@@ -81,27 +81,27 @@ class PlantTest(TestCase):
     @freeze_time('2023-12-20')
     def test_should_not_fertilize(self):
         # return False if not set
-        self.assertFalse(self.plant_only_water.should_fertilize())
+        self.assertFalse(self.plant_only_water.get_should_fertilize())
         # raises error if no season is defined
         self.plant_only_water.fertilizer = True
         self.plant_only_water.save()
-        self.assertRaises(ValueError, self.plant_only_water.should_fertilize)
+        self.assertRaises(ValueError, self.plant_only_water.get_should_fertilize)
         # returns False if not in the right season
         self.plant_only_water.fertilizer_season = Seasons.WINTER
         self.plant_only_water.save()
-        self.assertFalse(self.plant_only_water.should_fertilize())
+        self.assertFalse(self.plant_only_water.get_should_fertilize())
         # returns False if in the right season but already fertilized
         self.plant_only_water.fertilizer_season = Seasons.AUTUMN
         self.plant_only_water.save()
         self.plant_only_water.fertilize()
-        self.assertFalse(self.plant_only_water.should_fertilize())
+        self.assertFalse(self.plant_only_water.get_should_fertilize())
 
     @freeze_time('2023-12-21')
     def test_should_fertilize(self):
         self.plant_only_water.fertilizer = True
         self.plant_only_water.fertilizer_season = Seasons.WINTER
         self.plant_only_water.save()
-        self.assertTrue(self.plant_only_water.should_fertilize())
+        self.assertTrue(self.plant_only_water.get_should_fertilize())
 
     def test_next_fertilize_date(self):
         self.assertIsNone(self.plant_only_water.get_next_fertilize_date())
@@ -212,27 +212,27 @@ class PlantTest(TestCase):
     @freeze_time('2023-12-20')
     def test_should_not_repot(self):
         # return False if not set
-        self.assertFalse(self.plant_only_water.should_repot())
+        self.assertFalse(self.plant_only_water.get_should_repot())
         # raises error if no season is defined
         self.plant_only_water.repotting = True
         self.plant_only_water.save()
-        self.assertRaises(ValueError, self.plant_only_water.should_repot)
+        self.assertRaises(ValueError, self.plant_only_water.get_should_repot)
         # returns False if not in the right season
         self.plant_only_water.repotting_season = Seasons.WINTER
         self.plant_only_water.save()
-        self.assertFalse(self.plant_only_water.should_repot())
+        self.assertFalse(self.plant_only_water.get_should_repot())
         # returns False if in the right season but already fertilized
         self.plant_only_water.repotting_season = Seasons.AUTUMN
         self.plant_only_water.save()
         self.plant_only_water.repot()
-        self.assertFalse(self.plant_only_water.should_repot())
+        self.assertFalse(self.plant_only_water.get_should_repot())
 
     @freeze_time('2023-12-21')
     def test_should_repot(self):
         self.plant_only_water.repotting = True
         self.plant_only_water.repotting_season = Seasons.WINTER
         self.plant_only_water.save()
-        self.assertTrue(self.plant_only_water.should_repot())
+        self.assertTrue(self.plant_only_water.get_should_repot())
 
     def test_next_repotting_date(self):
         self.assertIsNone(self.plant_only_water.get_next_repotting_date())
