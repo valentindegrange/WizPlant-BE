@@ -1,12 +1,14 @@
 class Seasons:
-    SPRING = "Spring"
-    SUMMER = "Summer"
-    AUTUMN = "Autumn"
-    WINTER = "Winter"
+    SPRING = 'Spring'
+    SUMMER = 'Summer'
+    AUTUMN = 'Autumn'
+    WINTER = 'Winter'
 
-    choices = (
-        (SPRING, SPRING),
-        (SUMMER, SUMMER),
-        (AUTUMN, AUTUMN),
-        (WINTER, WINTER),
-    )
+
+class NotificationTypes:
+    EMAIL = 'EMAIL'
+    SMS = 'SMS'
+    IN_APP = 'IN_APP'
+
+
+

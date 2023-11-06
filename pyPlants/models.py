@@ -6,7 +6,7 @@ from django.db import models
 from django.utils import timezone
 from logging import getLogger
 
-from pyPlants.constants import Seasons
+from pyPlants.constants import Seasons, NotificationTypes
 from pyPlants.season_manager import SeasonManager
 from pyPlants.task_scheduler import schedule_check_plant_task
 
@@ -63,6 +63,13 @@ class PlantUser(AbstractBaseUser, PermissionsMixin, AbstractPlantModel):
         return self.email
 
 
+class SeasonType(models.TextChoices):
+    SPRING = Seasons.SPRING, Seasons.SPRING
+    SUMMER = Seasons.SUMMER, Seasons.SUMMER
+    AUTUMN = Seasons.AUTUMN, Seasons.AUTUMN
+    WINTER = Seasons.WINTER, Seasons.WINTER
+
+
 class Plant(AbstractPlantModel):
     class EarthMoistureOptions(models.TextChoices):
         LIGHTLY_DRY = 'LIGHTLY_DRY', 'Lightly Dry'
@@ -105,7 +112,7 @@ class Plant(AbstractPlantModel):
     fertilizer = models.BooleanField(default=False)
     fertilizer_season = models.CharField(
         max_length=20,
-        choices=Seasons.choices,
+        choices=SeasonType.choices,
         blank=True,
         null=True,
     )
@@ -113,7 +120,7 @@ class Plant(AbstractPlantModel):
     repotting = models.BooleanField(default=False)
     repotting_season = models.CharField(
         max_length=20,
-        choices=Seasons.choices,
+        choices=SeasonType.choices,
         blank=True,
         null=True,
     )
@@ -193,9 +200,9 @@ class Plant(AbstractPlantModel):
 
 
 class NotificationType(models.TextChoices):
-    EMAIL = 'EMAIL', 'Email'
-    SMS = 'SMS', 'SMS'
-    IN_APP = 'IN_APP', 'In-App'
+    EMAIL = NotificationTypes.EMAIL, NotificationTypes.EMAIL
+    SMS = NotificationTypes.SMS, NotificationTypes.SMS
+    IN_APP = NotificationTypes.IN_APP, NotificationTypes.IN_APP
 
 
 class Notification(AbstractPlantModel):
