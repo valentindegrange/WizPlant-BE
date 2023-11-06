@@ -24,3 +24,9 @@ class NotificationTest(TestCase):
 
     def test_no_notification_created(self):
         self.assertEqual(Notification.objects.count(), 0)
+
+    def can_change_notification_center(self):
+        self.notification_center_1.enable_in_app_notifications = False
+        self.notification_center_1.preferred_notification_hour = 15
+        self.notification_center_1.save()
+        self.assertFalse(self.notification_center_1.enable_in_app_notifications)

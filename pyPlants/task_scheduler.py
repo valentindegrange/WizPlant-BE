@@ -7,10 +7,13 @@ def schedule_check_plant_task(notification_center):
         hour=notification_center.preferred_notification_hour,
         minute=0  # set to * for testing
     )
-    task, _ = PeriodicTask.objects.get_or_create(
+    task, _ = PeriodicTask.objects.update_or_create(
+        # name is used to identify the task and query it later
         name=f'Check plants for {user.email}',
-        task='pyPlants.tasks.check_plants',
-        crontab=schedule,
-        args=[user.id]
+        defaults=dict(
+            task='pyPlants.tasks.check_plants',
+            crontab=schedule,
+            args=[user.id]
+        )
     )
     return task
