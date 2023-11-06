@@ -36,9 +36,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'pyPlants',
     'django_extensions',
     'django_celery_beat',
+    'rest_framework',
+    # local apps
+    'pyPlants',
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -157,4 +160,10 @@ LOGGING = {
             'level': 'INFO',
         }
     }
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
 }

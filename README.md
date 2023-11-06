@@ -33,10 +33,14 @@ python manage.py createsuperuser
 ```
 Follow the prompts to setup username, email and password.
 ### 6. Run locally
-To run the server & redis, run:
+To run the server, run:
 ```bash
 python manage.py runserver
 ```
+  
+Django admin: http://localhost:8000/admin  
+API: http://localhost:8000/api/  
+
 In a new terminal window, run the redis server:
 ```bash
 redis-server

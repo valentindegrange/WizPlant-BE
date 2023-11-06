@@ -13,6 +13,7 @@ django-celery-beat = "*"
 redis = "*"
 freezegun = "*"
 coverage = "*"
+djangorestframework = "*"
 
 [dev-packages]
 
