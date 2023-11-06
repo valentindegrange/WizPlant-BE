@@ -6,7 +6,7 @@ from django.db import models
 from django.utils import timezone
 from logging import getLogger
 
-from pyPlants.constants import Seasons, NotificationTypes
+from pyPlants.constants import Seasons, Notifications
 from pyPlants.season_manager import SeasonManager
 from pyPlants.task_scheduler import schedule_check_plant_task
 
@@ -200,9 +200,9 @@ class Plant(AbstractPlantModel):
 
 
 class NotificationType(models.TextChoices):
-    EMAIL = NotificationTypes.EMAIL, NotificationTypes.EMAIL
-    SMS = NotificationTypes.SMS, NotificationTypes.SMS
-    IN_APP = NotificationTypes.IN_APP, NotificationTypes.IN_APP
+    EMAIL = Notifications.EMAIL, Notifications.EMAIL
+    SMS = Notifications.SMS, Notifications.SMS
+    IN_APP = Notifications.IN_APP, Notifications.IN_APP
 
 
 class Notification(AbstractPlantModel):
@@ -214,33 +214,33 @@ class Notification(AbstractPlantModel):
         default=NotificationType.IN_APP,
     )
     sent = models.BooleanField(default=False)
-    sent_at = models.DateTimeField(auto_now_add=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
     viewed = models.BooleanField(default=False)
     viewed_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f'{self.user.email} - {self.notification_type} - {self.message}'
 
     def mark_as_viewed(self):
         self.viewed = True
         self.viewed_at = timezone.now()
         self.save()
 
+    def mark_as_sent(self):
+        self.sent = True
+        self.sent_at = timezone.now()
+        self.save()
+        NotificationCenter.objects.filter(user=self.user).update(last_notification_sent=timezone.now())
+
 
 class NotificationCenter(AbstractPlantModel):
     user = models.OneToOneField(PlantUser, on_delete=models.CASCADE)
+    enable_in_app_notifications = models.BooleanField(default=True)
     enable_email_notifications = models.BooleanField(default=False)
     enable_sms_notifications = models.BooleanField(default=False)
     preferred_notification_hour = models.IntegerField(default=9)
     last_notification_sent = models.DateTimeField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        if self.pk is None:
-            schedule_check_plant_task(self)
+        schedule_check_plant_task(self)
         super().save(*args, **kwargs)
-
-    def send_notification(self, message):
-        # very simple implementation for now
-        logger.info('New notification!')
-        notification = Notification.objects.create(user=self.user, message=message)
-        logger.info(f'({notification.user.email}) {notification.sent_at}: {notification.message}')
-        self.last_notification_sent = timezone.now()
-        self.save()
-        return notification
