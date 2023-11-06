@@ -5,7 +5,7 @@ class Seasons:
     WINTER = 'Winter'
 
 
-class NotificationTypes:
+class Notifications:
     EMAIL = 'EMAIL'
     SMS = 'SMS'
     IN_APP = 'IN_APP'
