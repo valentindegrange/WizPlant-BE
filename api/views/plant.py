@@ -16,7 +16,7 @@ class PlantModelViewSet(viewsets.ModelViewSet):
     ordering = ['last_watered']
 
     def get_queryset(self):
-        return Plant.objects.all()
+        return Plant.objects.filter(user=self.request.user)
 
     @action(methods=['post'], detail=True)
     def water(self, request, pk=None):

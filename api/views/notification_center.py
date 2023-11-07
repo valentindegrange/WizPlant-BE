@@ -8,4 +8,4 @@ class NotificationCenterModelViewSet(viewsets.ModelViewSet):
     serializer_class = NotificationCenterSerializer
 
     def get_queryset(self):
-        return NotificationCenter.objects.all()
+        return NotificationCenter.objects.filter(user=self.request.user)

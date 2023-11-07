@@ -16,7 +16,7 @@ class NotificationModelViewSet(viewsets.ModelViewSet):
     ordering = ['-sent_at']
 
     def get_queryset(self):
-        return Notification.objects.all()
+        return Notification.objects.filter(user=self.request.user)
 
     @action(methods=['post'], detail=True)
     def mark_as_viewed(self, request, pk=None):
