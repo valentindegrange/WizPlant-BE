@@ -173,6 +173,7 @@ class Plant(AbstractPlantModel):
             raise ValueError("This plant does not require fertilizer.")
 
     def get_should_fertilize(self):
+        """Should only be called once a day or when data needs to be refreshed"""
         should_fertilize = False
         if self.fertilizer:
             next_fertilize_date = self.get_next_fertilize_date()
@@ -183,6 +184,7 @@ class Plant(AbstractPlantModel):
         return should_fertilize
 
     def get_next_fertilize_date(self):
+        """Should only be called once a day or when data needs to be refreshed"""
         next_fertilize_date = None
         if self.fertilizer:
             season_manager = SeasonManager()
@@ -201,6 +203,7 @@ class Plant(AbstractPlantModel):
             raise ValueError("This plant does not require repotting.")
 
     def get_should_repot(self):
+        """Should only be called once a day or when data needs to be refreshed"""
         should_repot = False
         if self.repotting:
             next_repot_date = self.get_next_repotting_date()
@@ -211,6 +214,7 @@ class Plant(AbstractPlantModel):
         return should_repot
 
     def get_next_repotting_date(self):
+        """Should only be called once a day or when data needs to be refreshed"""
         next_repotting_date = None
         if self.repotting:
             season_manager = SeasonManager()
