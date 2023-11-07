@@ -171,7 +171,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
-        'oauth2_provider.contrib.rest_framework.TokenHasReadWriteScope',
+        # 'oauth2_provider.contrib.rest_framework.TokenHasReadWriteScope',
     ],
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
@@ -180,7 +180,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 20
 }
 
-OAUTH2_PROVIDER = {
-    'SCOPES': {'read': 'Read scope', 'write': 'Write scope'}
-}
+# OAUTH2_PROVIDER = {
+#     'SCOPES': {'read': 'Read scope', 'write': 'Write scope'}
+# }
 
