@@ -17,6 +17,8 @@ djangorestframework = "*"
 markdown = "*"
 django-filter = "*"
 django-oauth-toolkit = "*"
+django-phonenumber-field = "*"
+phonenumbers = "*"
 
 [dev-packages]
 
