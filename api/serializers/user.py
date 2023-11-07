@@ -5,7 +5,9 @@ from pyPlants.models import PlantUser
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlantUser
-        fields = '__all__'
-        extra_kwargs = {
-            'password': {'write_only': True},
-        }
+        fields = ['email', 'first_name', 'last_name', 'phone_number']
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    old_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
