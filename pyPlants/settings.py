@@ -183,4 +183,3 @@ REST_FRAMEWORK = {
 # OAUTH2_PROVIDER = {
 #     'SCOPES': {'read': 'Read scope', 'write': 'Write scope'}
 # }
-

@@ -78,4 +78,13 @@ In order to use the API, you need to create an application in the Django admin. 
 - Redirect uris: http://localhost:3000/oauth/callback https://oauth.pstmn.io/v1/callback
 - Algorithm: No OIDC support  
 
-Additional details are available in the [django-oauth-toolkit DRF documentation](https://django-oauth-toolkit.readthedocs.io/en/latest/rest-framework/getting_started.html)
+Additional details are available in the [django-oauth-toolkit DRF documentation](https://django-oauth-toolkit.readthedocs.io/en/latest/rest-framework/getting_started.html)  
+### 10. Postman Auth
+In order to connect to the API using Postman, you need to do it in 2 steps (for now):
+- Setup OAuth 2 Auth in Postman (with all the right params)
+- Generate a new token (enter the superuser creds)
+- Kill
+- Generate a token again (your user will be already authenticated)
+- Use the token
+
+It's clanky, but we'll fix it later.
