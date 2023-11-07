@@ -4,3 +4,4 @@ db.sqlite3
 /images/*
 celerybeat-schedule.db
 /.coverage
+/.env

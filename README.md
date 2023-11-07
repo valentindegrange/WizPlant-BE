@@ -68,3 +68,14 @@ To check coverage, run:
 coverage run --source='.' manage.py test
 coverage report
 ```
+### 9. API Authentication
+The API is using a OAuth2 authentication system.  
+The library used is [django-oauth-toolkit](https://django-oauth-toolkit.readthedocs.io/en/latest/index.html)
+
+In order to use the API, you need to create an application in the Django admin. Some extra params for the Application:
+- Authorization grant type: Authorization code
+- Client type: Confidential
+- Redirect uris: http://localhost:3000/oauth/callback https://oauth.pstmn.io/v1/callback
+- Algorithm: No OIDC support  
+
+Additional details are available in the [django-oauth-toolkit DRF documentation](https://django-oauth-toolkit.readthedocs.io/en/latest/rest-framework/getting_started.html)
