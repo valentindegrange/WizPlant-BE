@@ -6,7 +6,7 @@ from logging import getLogger
 
 logger = getLogger(__name__)
 
-USERS = ['foo@bar.com']
+USERS = ['foo@bar.com', 'bar@bar.com']
 PLANTS = ['Pachira', 'Croton', 'Pilea', 'Monstera', 'Ficus', 'Aloe']
 
 
