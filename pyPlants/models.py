@@ -6,10 +6,12 @@ from django.db import models
 from django.utils import timezone
 from phonenumber_field.modelfields import PhoneNumberField
 from logging import getLogger
+from PIL import Image
 
 from pyPlants.constants import Seasons, Notifications
 from pyPlants.season_manager import SeasonManager
 from pyPlants.task_scheduler import schedule_check_plant_task
+from pyPlants.utils import plant_pics_directory_path
 
 logger = getLogger(__name__)
 
@@ -98,7 +100,7 @@ class Plant(AbstractPlantModel):
 
     name = models.CharField(max_length=50)
     description = models.TextField(null=True, blank=True)
-    image = models.ImageField(upload_to='images/', null=True, blank=True)
+    image = models.ImageField(upload_to=plant_pics_directory_path, null=True, blank=True)
     user = models.ForeignKey(PlantUser, on_delete=models.CASCADE)
 
     # Sunlight
@@ -147,6 +149,14 @@ class Plant(AbstractPlantModel):
 
     # other
     extra_tips = models.TextField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        img = Image.open(self.image.path)
+        if img.height > 512 or img.width > 512:
+            output_size = (512, 512)
+            img.thumbnail(output_size)
+            img.save(self.image.path)
 
     def __str__(self):
         return self.name
