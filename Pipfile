@@ -19,6 +19,7 @@ django-filter = "*"
 django-oauth-toolkit = "*"
 django-phonenumber-field = "*"
 phonenumbers = "*"
+openai = "*"
 
 [dev-packages]
 

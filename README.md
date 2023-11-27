@@ -5,34 +5,42 @@ This project is a Django Project designed to help managing your plants (when to 
 - **Pipenv**
 - **Redis** (`brew install redis`)
 ## Installation & Setup
-### 1. Clone the Repository
+### Clone the Repository
 ```bash
 git clone https://github.com/valentindegrange/pyPlant.git
 cd pyPlants
 ```
-### 2. Install the dependencies
+### Install the dependencies
 To install the dependencies for the project, run:
 ```bash
 pipenv install
 ```
-### 3. Activate Virtual Environment
+### Env Variables
+Copy paste the `.env.template` file and rename it to `.env`
+
+### (optional) Enable OpenAI
+To enable OpenAI, get an OpenAI API key and paste it in the `.env` file:
+```
+OPENAI_API_KEY = "your_api_key"
+```
+### Activate Virtual Environment
 Activate Pipenv virtual env:
 ```bash
 pipenv shell
 ```
-### 4. Database Setup
+### Database Setup
 Setup the db (and optionally generate new migrations):
 ```bash
 python manage.py makemigrations # optional
 python manage.py migrate
 ```
-### 5. Create an Admin User
+### Create an Admin User
 To create a superuser, run:
 ```bash
 python manage.py createsuperuser
 ```
 Follow the prompts to setup username, email and password.
-### 6. Run locally
+### Run locally
 To run the server, run:
 ```bash
 python manage.py runserver
@@ -79,7 +87,7 @@ In order to use the API, you need to create an application in the Django admin. 
 - Algorithm: No OIDC support  
 
 Additional details are available in the [django-oauth-toolkit DRF documentation](https://django-oauth-toolkit.readthedocs.io/en/latest/rest-framework/getting_started.html)  
-### 10. Postman Auth
+### Postman Auth
 In order to connect to the API using Postman, you need to do it in 2 steps (for now):
 - Setup OAuth 2 Auth in Postman (with all the right params)
 - Generate a new token (enter the superuser creds)
