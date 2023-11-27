@@ -12,10 +12,10 @@ class CheckPlantTest(TestCase):
         self.user = PlantUser.objects.create_user(
             email='foo@bar.com'
         )
-        self.notification_center = NotificationCenter.objects.create(
-            user=self.user,
-            preferred_notification_hour=12
-        )
+        self.notification_center = NotificationCenter.objects.get(user=self.user)
+        self.notification_center.preferred_notification_hour = 12
+        self.notification_center.save()
+
         self.plant_only_water = Plant.objects.create(
             name='Pachira',
             user=self.user,
@@ -26,10 +26,10 @@ class CheckPlantTest(TestCase):
         self.user_2 = PlantUser.objects.create_user(
             email='bar@bar.com'
         )
-        self.notification_center_2 = NotificationCenter.objects.create(
-            user=self.user_2,
-            preferred_notification_hour=12
-        )
+        self.notification_center_2 = NotificationCenter.objects.get(user=self.user_2)
+        self.notification_center_2.preferred_notification_hour = 12
+        self.notification_center_2.save()
+
 
     def test_check_plants_initial_run(self):
         self.assertEqual(Notification.objects.count(), 0)

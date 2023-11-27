@@ -10,17 +10,15 @@ class NotificationTest(TestCase):
         self.user_1 = PlantUser.objects.create_user(
             email='foo@bar.com'
         )
-        self.notification_center_1 = NotificationCenter.objects.create(
-            user=self.user_1,
-            preferred_notification_hour=12
-        )
+        self.notification_center_1 = NotificationCenter.objects.get(user=self.user_1)
+        self.notification_center_1.preferred_notification_hour = 12
+        self.notification_center_1.save()
         self.user_2 = PlantUser.objects.create_user(
             email='bar@bar.com'
         )
-        self.notification_center_2 = NotificationCenter.objects.create(
-            user=self.user_2,
-            preferred_notification_hour=8
-        )
+        self.notification_center_2 = NotificationCenter.objects.get(user=self.user_2)
+        self.notification_center_2.preferred_notification_hour = 8
+        self.notification_center_2.save()
 
     def test_no_notification_created(self):
         self.assertEqual(Notification.objects.count(), 0)

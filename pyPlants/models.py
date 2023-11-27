@@ -59,8 +59,12 @@ class PlantUser(AbstractBaseUser, PermissionsMixin, AbstractPlantModel):
     REQUIRED_FIELDS = []
 
     def save(self, *args, **kwargs):
-        # Your custom logic here
+        is_new_user = False
+        if not self.pk:
+            is_new_user = True
         super().save(*args, **kwargs)
+        if is_new_user:
+            NotificationCenter.objects.create(user=self)
 
     @property
     def full_name(self):

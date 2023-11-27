@@ -21,9 +21,11 @@ class Command(BaseCommand):
                 email=user, is_superuser=True, is_staff=True)
             usr.set_password('password')
             usr.save()
-            NotificationCenter.objects.create(
-                user=usr,
-                enable_email_notifications=True, enable_sms_notifications=False, preferred_notification_hour=9)
+            nt_ct = NotificationCenter.objects.get(user=usr)
+            nt_ct.enable_email_notifications = True
+            nt_ct.enable_sms_notifications = False
+            nt_ct.preferred_notification_hour = 9
+            nt_ct.save()
             for plant in PLANTS:
                 logger.info(f'Creating plant {plant}')
                 Plant.objects.create(name=plant, user=usr, water_frequency_summer=7, water_frequency_winter=14)

@@ -12,11 +12,11 @@ class NotificationManagerTest(TestCase):
         self.user = PlantUser.objects.create_user(
             email='foo@bar.com'
         )
-        self.notification_center = NotificationCenter.objects.create(
-            user=self.user,
-            preferred_notification_hour=12,
-            enable_in_app_notifications=True
-        )
+        self.notification_center = NotificationCenter.objects.get(user=self.user)
+        self.notification_center.preferred_notification_hour = 12
+        self.notification_center.enable_in_app_notifications = True
+        self.notification_center.save()
+
         self.plant_1 = Plant.objects.create(
             name='Pachira',
             user=self.user,
