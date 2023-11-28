@@ -12,13 +12,14 @@ class PlantAIService:
     """
     Class that manages OpenAI plant recognition and instructions generation.
     """
-    def __init__(self, plant: Plant):
+    def __init__(self, plant: Plant, ai_plant_answer: AIPlantAnswer = None):
         self.plant = plant
         user = self.plant.user
         if not user.has_ai_enabled:
             raise PermissionError('User does not have AI enabled')
         self.client = OpenAIClient()
-        self.ai_plant_answer = AIPlantAnswer.objects.create(plant=self.plant)
+        if not ai_plant_answer:
+            self.ai_plant_answer = AIPlantAnswer.objects.create(plant=self.plant)
 
     @shared_task(name='get_ai_plant_answer')
     def get_ai_plant_answer(self):
@@ -60,7 +61,6 @@ class PlantAIService:
             else:
                 plant_checker_answer = PlantCheckerAnswer.from_json_answer(decoded_response, plant_name)
                 self.ai_plant_answer.json_answer = plant_checker_answer.to_json()
-                self.ai_plant_answer.status = AIPlantAnswer.StatusChoice.SUCCESS
                 self.ai_plant_answer.save()
             # Generate an image of the plant if it doesn't have one
             if not has_plant_image:
@@ -72,12 +72,15 @@ class PlantAIService:
                     image_name = f'{plant_name}.png'
                     image_file = ContentFile(image_response.content, name=image_name)
                     self.ai_plant_answer.image.save(image_name, image_file, save=True)
-            return self.ai_plant_answer
         except Exception as ex:
             self.ai_plant_answer.status = AIPlantAnswer.StatusChoice.FAILURE
             self.ai_plant_answer.error_message = str(ex)
             self.ai_plant_answer.save()
             raise ex
+        finally:
+            self.ai_plant_answer.status = AIPlantAnswer.StatusChoice.SUCCESS
+            self.ai_plant_answer.save()
+            return self.ai_plant_answer
 
     def update_plant_from_ai_plant_answer(self):
         """
