@@ -54,6 +54,7 @@ class PlantUser(AbstractBaseUser, PermissionsMixin, AbstractPlantModel):
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(default=timezone.now)
+    has_ai_enabled = models.BooleanField(default=False)
 
     objects = CustomUserManager()
 
@@ -98,7 +99,7 @@ class Plant(AbstractPlantModel):
         DIRECT_SUN = 'DIRECT_SUN', 'Direct Sun'
         NO_DIRECT_SUN = 'NO_DIRECT_SUN', 'No Direct Sun'
 
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, blank=True, null=True)
     description = models.TextField(null=True, blank=True)
     image = models.ImageField(upload_to=plant_pics_directory_path, null=True, blank=True)
     user = models.ForeignKey(PlantUser, on_delete=models.CASCADE)
@@ -107,17 +108,19 @@ class Plant(AbstractPlantModel):
     sunlight = models.CharField(
         max_length=20,
         choices=SunlightOptions.choices,
-        default=SunlightOptions.LIGHT_EXPOSURE,
+        null=True,
+        blank=True
     )
     sun_exposure = models.CharField(
         max_length=20,
         choices=SunExposureOptions.choices,
-        default=SunExposureOptions.DIRECT_SUN,
+        null=True,
+        blank=True
     )
 
     # Watering
-    water_frequency_summer = models.IntegerField()
-    water_frequency_winter = models.IntegerField()
+    water_frequency_summer = models.IntegerField(null=True, blank=True)
+    water_frequency_winter = models.IntegerField(null=True, blank=True)
     last_watered = models.DateField(null=True, blank=True)
     should_water = models.BooleanField(default=False)
     next_water_date = models.DateField(null=True, blank=True)
@@ -158,9 +161,6 @@ class Plant(AbstractPlantModel):
                 output_size = (512, 512)
                 img.thumbnail(output_size)
                 img.save(self.image.path)
-
-    def __str__(self):
-        return self.name
 
     def water(self):
         self.last_watered = date.today()

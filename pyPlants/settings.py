@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     # local apps
     'pyPlants',
     'api',
+    'ai',
 ]
 
 MIDDLEWARE = [

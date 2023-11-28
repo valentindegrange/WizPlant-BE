@@ -4,9 +4,9 @@ from pyPlants.models import PlantUser, Plant, NotificationCenter, Notification
 
 
 class PlantUserAdmin(admin.ModelAdmin):
-    list_display = ('id', 'email', 'is_staff', 'is_superuser')
+    list_display = ('id', 'email', 'is_staff', 'is_superuser', 'has_ai_enabled')
     search_fields = ['email']
-    list_filter = ['is_staff', 'is_superuser']
+    list_filter = ['is_staff', 'is_superuser', 'has_ai_enabled']
 
 
 class NotificationCenterAdmin(admin.ModelAdmin):
@@ -19,7 +19,7 @@ class NotificationCenterAdmin(admin.ModelAdmin):
 
 
 class PlantAdmin(admin.ModelAdmin):
-    list_display = ('name', 'user', 'sun_exposure', 'water_frequency_summer',
+    list_display = ('id', 'name', 'user', 'sun_exposure', 'water_frequency_summer',
                     'water_frequency_winter', 'last_watered', 'leaf_mist',
                     'fertilizer', 'fertilizer_season', 'last_fertilized',
                     'repotting', 'repotting_season', 'last_repotted')
