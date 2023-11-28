@@ -1,80 +1,12 @@
 from datetime import date, timedelta
 
-from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
-from django.contrib.auth.models import User, PermissionsMixin
-from django.db import models
-from django.utils import timezone
-from phonenumber_field.modelfields import PhoneNumberField
-from logging import getLogger
 from PIL import Image
+from django.db import models
 
-from pyPlants.constants import Seasons, Notifications
+from pyPlants.constants import Seasons
+from pyPlants.models import AbstractPlantModel, PlantUser
 from pyPlants.season_manager import SeasonManager
-from pyPlants.task_scheduler import schedule_check_plant_task
 from pyPlants.utils import plant_pics_directory_path
-
-logger = getLogger(__name__)
-
-
-class AbstractPlantModel(models.Model):
-    created = models.DateTimeField(auto_now_add=True)
-    updated = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        abstract = True
-
-
-class CustomUserManager(BaseUserManager):
-    def create_user(self, email, password=None, **extra_fields):
-        if not email:
-            raise ValueError('The Email field must be set')
-        email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
-
-    def create_superuser(self, email, password=None, **extra_fields):
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
-
-        if extra_fields.get('is_staff') is not True:
-            raise ValueError('Superuser must have is_staff=True.')
-        if extra_fields.get('is_superuser') is not True:
-            raise ValueError('Superuser must have is_superuser=True.')
-
-        return self.create_user(email, password, **extra_fields)
-
-
-class PlantUser(AbstractBaseUser, PermissionsMixin, AbstractPlantModel):
-    first_name = models.CharField(max_length=50, null=True, blank=True)
-    last_name = models.CharField(max_length=50, null=True)
-    email = models.EmailField(unique=True)
-    phone_number = PhoneNumberField(blank=True)
-    is_staff = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
-    date_joined = models.DateTimeField(default=timezone.now)
-    has_ai_enabled = models.BooleanField(default=False)
-
-    objects = CustomUserManager()
-
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
-
-    def save(self, *args, **kwargs):
-        is_new_user = False
-        if not self.pk:
-            is_new_user = True
-        super().save(*args, **kwargs)
-        if is_new_user:
-            NotificationCenter.objects.create(user=self)
-
-    @property
-    def full_name(self):
-        return f'{self.first_name} {self.last_name}'
-
-    def __str__(self):
-        return self.full_name
 
 
 class SeasonType(models.TextChoices):
@@ -246,50 +178,3 @@ class Plant(AbstractPlantModel):
         self.next_repotting_date = next_repotting_date
         self.save()
         return next_repotting_date
-
-
-class NotificationType(models.TextChoices):
-    EMAIL = Notifications.EMAIL, Notifications.EMAIL
-    SMS = Notifications.SMS, Notifications.SMS
-    IN_APP = Notifications.IN_APP, Notifications.IN_APP
-
-
-class Notification(AbstractPlantModel):
-    user = models.ForeignKey(PlantUser, on_delete=models.CASCADE)
-    message = models.TextField()
-    notification_type = models.CharField(
-        max_length=20,
-        choices=NotificationType.choices,
-        default=NotificationType.IN_APP,
-    )
-    sent = models.BooleanField(default=False)
-    sent_at = models.DateTimeField(null=True, blank=True)
-    viewed = models.BooleanField(default=False)
-    viewed_at = models.DateTimeField(null=True, blank=True)
-
-    def __str__(self):
-        return f'{self.user.email} - {self.notification_type} - {self.message}'
-
-    def mark_as_viewed(self):
-        self.viewed = True
-        self.viewed_at = timezone.now()
-        self.save()
-
-    def mark_as_sent(self):
-        self.sent = True
-        self.sent_at = timezone.now()
-        self.save()
-        NotificationCenter.objects.filter(user=self.user).update(last_notification_sent=timezone.now())
-
-
-class NotificationCenter(AbstractPlantModel):
-    user = models.OneToOneField(PlantUser, on_delete=models.CASCADE)
-    enable_in_app_notifications = models.BooleanField(default=True)
-    enable_email_notifications = models.BooleanField(default=False)
-    enable_sms_notifications = models.BooleanField(default=False)
-    preferred_notification_hour = models.IntegerField(default=9)
-    last_notification_sent = models.DateTimeField(null=True, blank=True)
-
-    def save(self, *args, **kwargs):
-        schedule_check_plant_task(self)
-        super().save(*args, **kwargs)
