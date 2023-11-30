@@ -19,7 +19,7 @@ class NotificationCenterAdmin(admin.ModelAdmin):
 
 
 class PlantAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'user', 'sun_exposure', 'water_frequency_summer',
+    list_display = ('id', 'name', 'user', 'is_complete', 'sun_exposure', 'water_frequency_summer',
                     'water_frequency_winter', 'last_watered', 'leaf_mist',
                     'fertilizer', 'fertilizer_season', 'last_fertilized',
                     'repotting', 'repotting_season', 'last_repotted')
@@ -28,7 +28,7 @@ class PlantAdmin(admin.ModelAdmin):
 
 
 class NotificationAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'user', 'message', 'notification_type', 'sent', 'viewed', 'sent_at', 'viewed_at')
+    list_display = ('pk', 'user', 'created', 'notification_type', 'sent', 'viewed', 'sent_at', 'viewed_at')
     search_fields = ['user', 'message']
     list_filter = ['sent', 'viewed']
 
