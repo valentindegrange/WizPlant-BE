@@ -1,5 +1,6 @@
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
+from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.response import Response
 
 from django_filters import rest_framework as dj_filters
@@ -22,4 +23,17 @@ class NotificationModelViewSet(viewsets.ModelViewSet):
     def mark_as_viewed(self, request, pk=None):
         notification = self.get_object()
         notification.mark_as_viewed()
-        return Response(status=status.HTTP_200_OK)
+        serializer = self.get_serializer(notification, many=False)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        raise MethodNotAllowed("POST", detail="Creation not allowed.")
+
+    def update(self, request, *args, **kwargs):
+        raise MethodNotAllowed("PUT", detail="Updating not allowed.")
+
+    def partial_update(self, request, *args, **kwargs):
+        raise MethodNotAllowed("PATCH", detail="Partial updating not allowed.")
+
+    def destroy(self, request, *args, **kwargs):
+        raise MethodNotAllowed("DELETE", detail="Deletion not allowed.")
