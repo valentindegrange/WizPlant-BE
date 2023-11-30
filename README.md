@@ -53,9 +53,9 @@ In a new terminal window, run the redis server:
 ```bash
 redis-server
 ```
-In a new terminal window, run the celery beat worker:
+In a new terminal window, run the celery beat worker (here with an interval of 60s):
 ```bash
-python -m celery -A pyPlants beat -l INFO --scheduler django_celery_beat.schedulers:DatabaseScheduler
+celery -A pyPlants beat -l debug --scheduler django_celery_beat.schedulers:DatabaseScheduler --max-interval=60
 ```
 In a new terminal window, run the celery worker:
 ```bash
