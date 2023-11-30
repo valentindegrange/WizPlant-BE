@@ -18,10 +18,26 @@ class PlantAIService:
         if not user.has_ai_enabled:
             raise PermissionError('User does not have AI enabled')
         self.client = OpenAIClient()
+
         if not ai_plant_answer:
             self.ai_plant_answer = AIPlantAnswer.objects.create(plant=self.plant)
+        else:
+            self.ai_plant_answer = ai_plant_answer
 
-    @shared_task(name='get_ai_plant_answer')
+        has_plant_name = self.plant.name is not None
+        has_plant_image = True if self.plant.image.name else False
+        if not has_plant_name and not has_plant_image:
+            self.ai_plant_answer.status = AIPlantAnswer.StatusChoice.FAILURE
+            self.ai_plant_answer.error_message = 'Plant does not have name or image'
+            self.ai_plant_answer.save()
+            raise ValueError('Plant does not have name or image')
+        if not has_plant_name:
+            self.ai_plant_answer.is_checking_image = True
+            self.ai_plant_answer.save()
+        if not has_plant_image:
+            self.ai_plant_answer.is_generating_image = True
+            self.ai_plant_answer.save()
+
     def get_ai_plant_answer(self):
         """
         Gets the AI plant answer from the OpenAI API.
@@ -33,11 +49,6 @@ class PlantAIService:
         has_plant_name = self.plant.name is not None
         has_plant_image = True if self.plant.image.name else False
         plant_name = self.plant.name
-        if not has_plant_name and not has_plant_image:
-            self.ai_plant_answer.status = AIPlantAnswer.StatusChoice.FAILURE
-            self.ai_plant_answer.error_message = 'Plant does not have name or image'
-            self.ai_plant_answer.save()
-            raise ValueError('Plant does not have name or image')
         # starts the process
         self.ai_plant_answer.status = AIPlantAnswer.StatusChoice.IN_PROGRESS
         self.ai_plant_answer.save()
@@ -47,14 +58,14 @@ class PlantAIService:
                 response = self.client.plant_recognizer(self.plant.image.path)
                 decoded_response = self.client.decode_response(response)
                 if 'unknown' in decoded_response:
-                    raise ValueError('Plant could not be recognized')
+                    raise ValueError('Plant could not be recognized from image')
                 plant_name = decoded_response
             # get plants instructions
             response = self.client.plant_checker(plant_name)
             decoded_response = self.client.decode_json_response(response)
             # check if response is valid
             if 'error' in decoded_response:
-                raise ValueError('Plant could not be recognized')
+                raise ValueError('Plant name could not be recognized')
             # check if response is properly formatted
             if not PlantCheckerAnswer.is_json_valid(decoded_response):
                 raise ValueError('Plant instructions are not properly formatted')
@@ -77,10 +88,12 @@ class PlantAIService:
             self.ai_plant_answer.error_message = str(ex)
             self.ai_plant_answer.save()
             raise ex
-        finally:
+        else:
             self.ai_plant_answer.status = AIPlantAnswer.StatusChoice.SUCCESS
             self.ai_plant_answer.save()
             return self.ai_plant_answer
+        finally:
+            return self.ai_plant_answer.status
 
     def update_plant_from_ai_plant_answer(self):
         """
@@ -89,6 +102,7 @@ class PlantAIService:
         if self.ai_plant_answer.status != AIPlantAnswer.StatusChoice.SUCCESS:
             raise ValueError('Plant answer is not successful')
         plant_checker_answer = PlantCheckerAnswer(**self.ai_plant_answer.json_answer)
+        self.plant.name = plant_checker_answer.name
         self.plant.description = plant_checker_answer.description
         self.plant.water_frequency_summer = plant_checker_answer.water_frequency_summer
         self.plant.water_frequency_winter = plant_checker_answer.water_frequency_winter
