@@ -39,4 +39,4 @@ class AIPlantAnswerViewSet(viewsets.ModelViewSet):
         plant = ai_plant_answer.plant
         service = PlantAIService(plant=plant, ai_plant_answer=ai_plant_answer)
         service.update_plant_from_ai_plant_answer()
-        return Response(status=status.HTTP_200_OK)
+        return Response(data={'id': ai_plant_answer.id, 'plant': plant.id}, status=status.HTTP_200_OK)

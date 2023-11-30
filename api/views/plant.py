@@ -26,14 +26,18 @@ class PlantModelViewSet(viewsets.ModelViewSet):
     def water(self, request, pk=None):
         plant = self.get_object()
         plant.water()
-        return Response(status=status.HTTP_200_OK)
+        plant.refresh_from_db()
+        serializer = self.get_serializer(plant, many=False)
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     @action(methods=['post'], detail=True)
     def fertilize(self, request, pk=None):
         plant = self.get_object()
         try:
             plant.fertilize()
-            return Response(status=status.HTTP_200_OK)
+            plant.refresh_from_db()
+            serializer = self.get_serializer(plant, many=False)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
         except ValueError as err:
             return Response(data={'error': str(err)}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -42,7 +46,9 @@ class PlantModelViewSet(viewsets.ModelViewSet):
         plant = self.get_object()
         try:
             plant.repot()
-            return Response(status=status.HTTP_200_OK)
+            plant.refresh_from_db()
+            serializer = self.get_serializer(plant, many=False)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
         except ValueError as err:
             return Response(data={'error': str(err)}, status=status.HTTP_400_BAD_REQUEST)
 
