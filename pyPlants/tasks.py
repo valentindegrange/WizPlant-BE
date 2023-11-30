@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 def check_plants(user_id):
     user = PlantUser.objects.get(id=user_id)
     notification_center = NotificationCenter.objects.get(user=user)
-    plants = Plant.objects.filter(user=user)
+    plants = Plant.objects.filter(user=user, is_complete=True)
 
     plant_action = ActionPlant()
 
