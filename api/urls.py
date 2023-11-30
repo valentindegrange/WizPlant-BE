@@ -5,10 +5,12 @@ from api.views.notification import NotificationModelViewSet
 from api.views.notification_center import NotificationCenterViews
 from api.views.plant import PlantModelViewSet
 from api.views.user import UserView, ChangePasswordView
+from api.views.ai_plant_answer import AIPlantAnswerViewSet
 
 router = DefaultRouter()
 router.register(r'plants', PlantModelViewSet, basename='plant')
 router.register(r'notifications', NotificationModelViewSet, basename='notification')
+router.register(r'ai-plant-answers', AIPlantAnswerViewSet, basename='ai-plant-answer')
 
 
 urlpatterns = [
