@@ -85,7 +85,10 @@ class Plant(AbstractPlantModel):
     # other
     extra_tips = models.TextField(null=True, blank=True)
 
+    is_complete = models.BooleanField(default=False)
+
     def save(self, *args, **kwargs):
+        self.is_complete = self.check_is_complete()
         super().save(*args, **kwargs)
         if self.image:
             img = Image.open(self.image.path)
@@ -93,6 +96,13 @@ class Plant(AbstractPlantModel):
                 output_size = (512, 512)
                 img.thumbnail(output_size)
                 img.save(self.image.path)
+
+    def check_is_complete(self):
+        """Checks if all required fields are filled out."""
+        is_complete = False
+        if self.name and self.sunlight and self.sun_exposure and self.water_frequency_summer and self.water_frequency_winter:
+            is_complete = True
+        return is_complete
 
     def water(self):
         self.last_watered = date.today()
