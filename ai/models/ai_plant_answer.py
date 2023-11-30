@@ -15,3 +15,5 @@ class AIPlantAnswer(AbstractPlantModel):
     json_answer = models.JSONField(null=True, blank=True)
     error_message = models.TextField(null=True, blank=True)
     image = models.ImageField(null=True, blank=True, upload_to=plant_logos_directory_path)
+    is_checking_image = models.BooleanField(default=False)
+    is_generating_image = models.BooleanField(default=False)
