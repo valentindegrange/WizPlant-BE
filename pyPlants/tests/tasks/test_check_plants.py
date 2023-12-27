@@ -21,6 +21,8 @@ class CheckPlantTest(TestCase):
             user=self.user,
             water_frequency_summer=7,
             water_frequency_winter=14,
+            sunlight=Plant.SunlightOptions.SHADE,
+            sun_exposure=Plant.SunExposureOptions.DIRECT_SUN,
         )
 
         self.user_2 = PlantUser.objects.create_user(
