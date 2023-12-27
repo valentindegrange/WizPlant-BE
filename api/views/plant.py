@@ -14,10 +14,9 @@ from pyPlants.models import Plant
 class PlantModelViewSet(viewsets.ModelViewSet):
     serializer_class = PlantSerializer
     filter_backends = [dj_filters.DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ('name', 'fertilizer', 'repotting')
+    filterset_fields = ('name', 'fertilizer', 'repotting', 'is_complete')
     search_fields = ('name', 'description')
     ordering_fields = '__all__'
-    ordering = ['last_watered']
 
     def get_queryset(self):
         return Plant.objects.filter(user=self.request.user)

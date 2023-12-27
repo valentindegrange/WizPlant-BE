@@ -24,7 +24,15 @@ class PlantAdmin(admin.ModelAdmin):
                     'fertilizer', 'fertilizer_season', 'last_fertilized',
                     'repotting', 'repotting_season', 'last_repotted')
     search_fields = ['name', 'user']
-    list_filter = ['last_watered', 'last_fertilized', 'last_repotted']
+    list_filter = ['last_watered', 'last_fertilized', 'last_repotted', 'user']
+
+    def save_model(self, request, obj, form, change):
+        kwargs = dict()
+        if change:
+            kwargs['force_update'] = True
+        else:
+            kwargs['force_insert'] = True
+        obj.save(**kwargs)
 
 
 class NotificationAdmin(admin.ModelAdmin):

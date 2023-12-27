@@ -1,6 +1,7 @@
 from openai import OpenAI
 import base64
 import json
+import os
 
 
 class OpenAIClient:
@@ -9,6 +10,7 @@ class OpenAIClient:
         self.default_model = 'gpt-4-1106-preview'
         self.vision_model = 'gpt-4-vision-preview'
         self.image_generation_model = 'dall-e-3'
+        self.default_language = "french"
 
     @staticmethod
     def decode_response(response):
@@ -24,7 +26,6 @@ class OpenAIClient:
         Given a plant name, will call openai to generate a response on how to take care of the plant.
         The response will be in JSON format and compliant with the pyPlants.models.Plant model.
         """
-        default_language = "french"
         response = self.client.chat.completions.create(
             model=self.default_model,
             response_format={"type": "json_object"},
@@ -33,7 +34,7 @@ class OpenAIClient:
                     "role": "system",
                     "content": "You're a plant expert, designed to help users to take care of their plants."
                                "\nFor each given plant, you should always provide the following information in the JSON format:"
-                               f"\n- description: A description of the plant in {default_language} (string)"
+                               f"\n- description: A description of the plant in {self.default_language} (string)"
                                "\n- water_frequency_summer: Summer Watering frequency, in days (integer)"
                                "\n- water_frequency_winter: Winter Watering frequency, in days (integer)"
                                "\n- sunlight: How much sunlight it needs (light_exposure, partial_shade or shade)"
@@ -43,7 +44,7 @@ class OpenAIClient:
                                "\n- repotting: If it needs to be repotted (True or False)"
                                "\n- repotting_season: The repotting season (spring, summer, fall or winter, 1 choice only) if it needs to be repotted"
                                "\n- leaf_mist: If its leaves need to be misted (True or False)"
-                               f"\n- extra_tips: Provide any additional tips for taking care of the plant (string) - in {default_language}, for non plant experts."
+                               f"\n- extra_tips: Provide any additional tips for taking care of the plant (string) - in {self.default_language}, for non plant experts."
                                "\n In case you don't know the plant, instead you should answer with a json: 'error: unknown plant''"
                 },
                 {
@@ -56,37 +57,55 @@ class OpenAIClient:
 
     def plant_recognizer(self, image_path: str):
         """
-        Given an image of a plant, will call openai to generate a response on what plant it is.
+        Given an image of a plant, will call OpenAI to generate a response on what plant it is.
         """
-        with open(image_path, "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
-        response = self.client.chat.completions.create(
-            model=self.vision_model,
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You're a plant expert, designed to help users to take care of their plants. "
-                               "You can recognize plants provided by the user and ONLY answer with the name of the plant."
-                               "If you can't recognize the plant, you should only answer with 'unknown'"
-                },
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": "What is the name of this plant?"
-                        },
-                        {
-                            "type": "image",
-                            "image_url": {
-                                "url": f"data:image/jpeg;base64,{encoded_string}"
+        if not os.path.exists(image_path):
+            raise ValueError(f"Error: The file at {image_path} does not exist.")
+
+        file_size = os.path.getsize(image_path)
+        print(f"File size: {file_size} bytes")
+        if file_size >= 20 * 1024 * 1024:  # 20 MB
+            raise ValueError("Error: File size exceeds 20 MB limit.")
+
+        try:
+            with open(image_path, "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read()).decode('utf-8')
+        except Exception as e:
+            print(f"Error reading or encoding the image: {e}")
+            raise e
+
+        try:
+            response = self.client.chat.completions.create(
+                model=self.vision_model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You're a plant expert, designed to help users to take care of their plants. "
+                                   f"You can recognize plants provided by the user and ONLY answer with the common name "
+                                   f"of the plant (in {self.default_language})."
+                                   "If you can't recognize the plant, you should only answer with 'unknown'"
+                    },
+                    {
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": "What is the name of this plant?"
+                            },
+                            {
+                                "type": "image",
+                                "image_url": {
+                                    "url": f"data:image/jpeg;base64,{encoded_string}"
+                                }
                             }
-                        }
-                    ]
-                }
-            ]
-        )
-        return response
+                        ]
+                    }
+                ]
+            )
+            return response
+        except Exception as e:
+            print(f"Error making request to OpenAI: {e}")
+            raise e
 
     def plant_image_generator(self, plant_name: str):
         """

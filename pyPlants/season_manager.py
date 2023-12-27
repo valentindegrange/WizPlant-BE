@@ -28,8 +28,10 @@ class SeasonManager:
             if self.date_in_season(date, season):
                 return season
 
-    def get_half_year(self, date):
+    def get_half_year(self, date = None):
         """Returns the half year season (WINTER or SUMMER) for a given date"""
+        if date is None:
+            date = datetime.date.today()
         return self.half_years[self.get_season(date)]
 
     def date_in_season(self, date: datetime.date, season):

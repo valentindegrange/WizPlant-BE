@@ -4,7 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-django = "*"
+django = "==5.0.0"
 pillow = "*"
 ipython = "*"
 django-extensions = "*"
@@ -20,6 +20,8 @@ django-oauth-toolkit = "*"
 django-phonenumber-field = "*"
 phonenumbers = "*"
 openai = "*"
+djangorestframework-simplejwt = "*"
+django-cors-headers = "*"
 
 [dev-packages]
 

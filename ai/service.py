@@ -24,17 +24,17 @@ class PlantAIService:
         else:
             self.ai_plant_answer = ai_plant_answer
 
-        has_plant_name = self.plant.name is not None
-        has_plant_image = True if self.plant.image.name else False
-        if not has_plant_name and not has_plant_image:
+        self.has_plant_name = self.plant.name is not None and self.plant.name != ''
+        self.has_plant_image = True if self.plant.image.name else False
+        if not self.has_plant_name and not self.has_plant_image:
             self.ai_plant_answer.status = AIPlantAnswer.StatusChoice.FAILURE
             self.ai_plant_answer.error_message = 'Plant does not have name or image'
             self.ai_plant_answer.save()
             raise ValueError('Plant does not have name or image')
-        if not has_plant_name:
+        if not self.has_plant_name:
             self.ai_plant_answer.is_checking_image = True
             self.ai_plant_answer.save()
-        if not has_plant_image:
+        if not self.has_plant_image:
             self.ai_plant_answer.is_generating_image = True
             self.ai_plant_answer.save()
 
@@ -46,15 +46,13 @@ class PlantAIService:
         Last, it will store the answer into the associated AIPlantAnswer object.
         In case of failure, it will raise an exception and store the failure message into the AIPlantAnswer object.
         """
-        has_plant_name = self.plant.name is not None
-        has_plant_image = True if self.plant.image.name else False
         plant_name = self.plant.name
         # starts the process
         self.ai_plant_answer.status = AIPlantAnswer.StatusChoice.IN_PROGRESS
         self.ai_plant_answer.save()
         try:
             # try to get plant name from image
-            if not has_plant_name:
+            if not self.has_plant_name:
                 response = self.client.plant_recognizer(self.plant.image.path)
                 decoded_response = self.client.decode_response(response)
                 if 'unknown' in decoded_response:
@@ -74,7 +72,7 @@ class PlantAIService:
                 self.ai_plant_answer.json_answer = plant_checker_answer.to_json()
                 self.ai_plant_answer.save()
             # Generate an image of the plant if it doesn't have one
-            if not has_plant_image:
+            if not self.has_plant_image:
                 response = self.client.plant_image_generator(plant_name)
                 # omitting decoding for now
                 url = response.data[0].url

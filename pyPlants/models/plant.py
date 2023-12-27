@@ -2,6 +2,7 @@ from datetime import date, timedelta
 
 from PIL import Image
 from django.db import models
+from django.db.models import When, Q, Value, Case, F
 
 from pyPlants.constants import Seasons
 from pyPlants.models import AbstractPlantModel, PlantUser
@@ -82,6 +83,16 @@ class Plant(AbstractPlantModel):
     should_repot = models.BooleanField(default=False)
     next_repotting_date = models.DateField(null=True, blank=True)
 
+    needs_care = models.GeneratedField(
+        expression=Case(
+            When(should_water=True, then=Value(True)),
+            When(should_repot=True, then=Value(True)),
+            When(should_fertilize=True, then=Value(True)),
+            default=Value(False)),
+        output_field=models.BooleanField(),
+        db_persist=True
+    )
+
     # other
     extra_tips = models.TextField(null=True, blank=True)
 
@@ -107,6 +118,8 @@ class Plant(AbstractPlantModel):
     def water(self):
         self.last_watered = date.today()
         self.save()
+        self.refresh_from_db()
+        self.get_should_water()
 
     def get_should_water(self):
         should_water = date.today() >= self.get_next_water_date()
@@ -118,21 +131,27 @@ class Plant(AbstractPlantModel):
         if self.last_watered is None:
             next_water_date = date.today()
         else:
-            season_manager = SeasonManager()
-            half_year_season = season_manager.get_half_year(date=self.last_watered)
-            if half_year_season == Seasons.SUMMER:
-                water_frequency = self.water_frequency_summer
-            else:
-                water_frequency = self.water_frequency_winter
+            water_frequency = self.get_water_frequency()
             next_water_date = self.last_watered + timedelta(days=water_frequency)
         self.next_water_date = next_water_date
         self.save()
         return next_water_date
 
+    def get_water_frequency(self):
+        season_manager = SeasonManager()
+        half_year_season = season_manager.get_half_year(date=self.last_watered)
+        if half_year_season == Seasons.SUMMER:
+            water_frequency = self.water_frequency_summer
+        else:
+            water_frequency = self.water_frequency_winter
+        return water_frequency
+
     def fertilize(self):
         if self.fertilizer:
             self.last_fertilized = date.today()
             self.save()
+            self.refresh_from_db()
+            self.get_should_fertilize()
         else:
             raise ValueError("This plant does not require fertilizer.")
 
@@ -163,6 +182,8 @@ class Plant(AbstractPlantModel):
         if self.repotting:
             self.last_repotted = date.today()
             self.save()
+            self.refresh_from_db()
+            self.get_should_repot()
         else:
             raise ValueError("This plant does not require repotting.")
 
