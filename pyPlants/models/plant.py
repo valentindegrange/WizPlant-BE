@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 
-from PIL import Image
+from PIL import Image, ExifTags
 from django.db import models
 from django.db.models import When, Q, Value, Case, F
 
@@ -32,7 +32,7 @@ class Plant(AbstractPlantModel):
         DIRECT_SUN = 'DIRECT_SUN', 'Direct Sun'
         NO_DIRECT_SUN = 'NO_DIRECT_SUN', 'No Direct Sun'
 
-    name = models.CharField(max_length=50, blank=True, null=True)
+    name = models.CharField(max_length=150, blank=True, null=True)
     description = models.TextField(null=True, blank=True)
     image = models.ImageField(upload_to=plant_pics_directory_path, null=True, blank=True)
     user = models.ForeignKey(PlantUser, on_delete=models.CASCADE)
@@ -99,12 +99,33 @@ class Plant(AbstractPlantModel):
     is_complete = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
+
         self.is_complete = self.check_is_complete()
         super().save(*args, **kwargs)
+        self.resize_image()
+
+    def resize_image(self):
+        img_dim = 1024
         if self.image:
             img = Image.open(self.image.path)
-            if img.height > 512 or img.width > 512:
-                output_size = (512, 512)
+            # Rotate the image based on EXIF orientation - an issue occurs when uploading images from iOS devices
+            try:
+                for orientation in ExifTags.TAGS.keys():
+                    if ExifTags.TAGS[orientation] == 'Orientation':
+                        break
+                exif = dict(img._getexif().items())
+                if exif[orientation] == 3:
+                    img = img.rotate(180, expand=True)
+                elif exif[orientation] == 6:
+                    img = img.rotate(270, expand=True)
+                elif exif[orientation] == 8:
+                    img = img.rotate(90, expand=True)
+            except (AttributeError, KeyError, IndexError):
+                # cases: image don't have getexif
+                pass
+            # Resize the image
+            if img.height > img_dim or img.width > img_dim:
+                output_size = (img_dim, img_dim)
                 img.thumbnail(output_size)
                 img.save(self.image.path)
 
