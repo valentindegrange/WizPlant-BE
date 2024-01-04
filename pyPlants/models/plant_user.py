@@ -37,7 +37,7 @@ class PlantUser(AbstractBaseUser, PermissionsMixin, AbstractPlantModel):
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(default=timezone.now)
-    has_ai_enabled = models.BooleanField(default=False)
+    has_ai_enabled = models.BooleanField(default=False, help_text='Whether the user has AI features enabled or not')
 
     objects = CustomUserManager()
 
