@@ -2,6 +2,7 @@ from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters import rest_framework as dj_filters
+from django.db import models
 
 from ai.models import AIPlantAnswer
 from ai.service import PlantAIService
@@ -11,10 +12,27 @@ from api.serializers.plant import PlantSerializer
 from pyPlants.models import Plant
 
 
+class PlantFilter(dj_filters.FilterSet):
+    class Meta:
+        model = Plant
+        fields = {
+            'name': ['icontains'],
+            'fertilizer': ['exact'],
+            'repotting': ['exact'],
+            'is_complete': ['exact'],
+            'needs_care': ['exact']
+        }
+        filter_overrides = {
+            models.GeneratedField:{
+                'filter_class': dj_filters.BooleanFilter
+            }
+        }
+
+
 class PlantModelViewSet(viewsets.ModelViewSet):
     serializer_class = PlantSerializer
     filter_backends = [dj_filters.DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ('name', 'fertilizer', 'repotting', 'is_complete')
+    filterset_class = PlantFilter
     search_fields = ('name', 'description')
     ordering_fields = '__all__'
 
