@@ -1,5 +1,6 @@
 # pyPlant
-This project is a Django Project designed to help managing your plants (when to water them, when to repot & fertilize them, etc)
+This project is a Django Project designed to help managing your plants (when to water them, when to repot & fertilize them, etc)  
+Backend for [PlantWiz](https://github.com/valentindegrange/WizPlant)
 ## Prerequisites
 - **Python 3.9+**
 - **Pipenv**
