@@ -5,12 +5,16 @@ import os
 
 
 class OpenAIClient:
-    def __init__(self):
+    def __init__(self, default_language=None):
         self.client = OpenAI()
         self.default_model = 'gpt-4-1106-preview'
         self.vision_model = 'gpt-4-vision-preview'
         self.image_generation_model = 'dall-e-3'
-        self.default_language = "french"
+        if not default_language:
+            self.default_language = "French"
+        else:
+            self.default_language = default_language
+        print(f"Default language: {self.default_language}")
 
     @staticmethod
     def decode_response(response):
@@ -26,6 +30,7 @@ class OpenAIClient:
         Given a plant name, will call openai to generate a response on how to take care of the plant.
         The response will be in JSON format and compliant with the pyPlants.models.Plant model.
         """
+        print(f"Default language: {self.default_language}")
         response = self.client.chat.completions.create(
             model=self.default_model,
             response_format={"type": "json_object"},

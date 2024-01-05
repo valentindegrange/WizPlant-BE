@@ -17,7 +17,7 @@ class PlantAIService:
         user = self.plant.user
         if not user.has_ai_enabled:
             raise PermissionError('User does not have AI enabled')
-        self.client = OpenAIClient()
+        self.client = OpenAIClient(default_language=user.get_default_language_display())
 
         if not ai_plant_answer:
             self.ai_plant_answer = AIPlantAnswer.objects.create(plant=self.plant)

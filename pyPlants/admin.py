@@ -4,9 +4,9 @@ from pyPlants.models import PlantUser, Plant, NotificationCenter, Notification
 
 
 class PlantUserAdmin(admin.ModelAdmin):
-    list_display = ('id', 'email', 'is_staff', 'is_superuser', 'has_ai_enabled')
+    list_display = ('id', 'email', 'has_ai_enabled', 'default_language', 'is_staff', 'is_superuser')
     search_fields = ['email']
-    list_filter = ['is_staff', 'is_superuser', 'has_ai_enabled']
+    list_filter = ['is_staff', 'is_superuser', 'has_ai_enabled', 'default_language']
 
 
 class NotificationCenterAdmin(admin.ModelAdmin):

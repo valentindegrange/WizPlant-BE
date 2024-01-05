@@ -5,7 +5,7 @@ from pyPlants.models import PlantUser
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = PlantUser
-        fields = ['email', 'first_name', 'last_name', 'phone_number', 'has_ai_enabled']
+        fields = ['email', 'first_name', 'last_name', 'phone_number', 'default_language', 'has_ai_enabled']
         read_only_fields = ['has_ai_enabled']
 
 

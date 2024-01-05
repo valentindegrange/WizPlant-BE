@@ -30,14 +30,20 @@ class CustomUserManager(BaseUserManager):
 
 
 class PlantUser(AbstractBaseUser, PermissionsMixin, AbstractPlantModel):
+    class LanguageChoices(models.TextChoices):
+        ENGLISH = 'EN', 'English'
+        FRENCH = 'FR', 'French'
+
     first_name = models.CharField(max_length=50, null=True, blank=True)
     last_name = models.CharField(max_length=50, null=True)
     email = models.EmailField(unique=True)
     phone_number = PhoneNumberField(blank=True)
+    default_language = models.CharField(max_length=2, choices=LanguageChoices.choices, default=LanguageChoices.ENGLISH)
+    has_ai_enabled = models.BooleanField(default=False, help_text='Whether the user has AI features enabled or not')
+    date_joined = models.DateTimeField(auto_now_add=True)
+
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    date_joined = models.DateTimeField(default=timezone.now)
-    has_ai_enabled = models.BooleanField(default=False, help_text='Whether the user has AI features enabled or not')
 
     objects = CustomUserManager()
 
