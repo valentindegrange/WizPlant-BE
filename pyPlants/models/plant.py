@@ -98,11 +98,18 @@ class Plant(AbstractPlantModel):
 
     is_complete = models.BooleanField(default=False)
 
-    def save(self, *args, **kwargs):
-
+    def save(self, force_checks=True, *args, **kwargs):
         self.is_complete = self.check_is_complete()
         super().save(*args, **kwargs)
+
+        if self.is_complete and force_checks:
+            self.check_needs_care()
         self.resize_image()
+
+    def check_needs_care(self):
+        self.get_should_water()
+        self.get_should_fertilize()
+        self.get_should_repot()
 
     def resize_image(self):
         img_dim = 1024
@@ -139,13 +146,11 @@ class Plant(AbstractPlantModel):
     def water(self):
         self.last_watered = date.today()
         self.save()
-        self.refresh_from_db()
-        self.get_should_water()
 
     def get_should_water(self):
         should_water = date.today() >= self.get_next_water_date()
         self.should_water = should_water
-        self.save()
+        self.save(force_checks=False)
         return should_water
 
     def get_next_water_date(self):
@@ -155,7 +160,7 @@ class Plant(AbstractPlantModel):
             water_frequency = self.get_water_frequency()
             next_water_date = self.last_watered + timedelta(days=water_frequency)
         self.next_water_date = next_water_date
-        self.save()
+        self.save(force_checks=False)
         return next_water_date
 
     def get_water_frequency(self):
@@ -171,8 +176,6 @@ class Plant(AbstractPlantModel):
         if self.fertilizer:
             self.last_fertilized = date.today()
             self.save()
-            self.refresh_from_db()
-            self.get_should_fertilize()
         else:
             raise ValueError("This plant does not require fertilizer.")
 
@@ -184,7 +187,7 @@ class Plant(AbstractPlantModel):
             if next_fertilize_date:
                 should_fertilize = date.today() >= next_fertilize_date
         self.should_fertilize = should_fertilize
-        self.save()
+        self.save(force_checks=False)
         return should_fertilize
 
     def get_next_fertilize_date(self):
@@ -196,15 +199,13 @@ class Plant(AbstractPlantModel):
                 season=self.fertilizer_season, date=self.last_fertilized
             )
         self.next_fertilize_date = next_fertilize_date
-        self.save()
+        self.save(force_checks=False)
         return next_fertilize_date
 
     def repot(self):
         if self.repotting:
             self.last_repotted = date.today()
             self.save()
-            self.refresh_from_db()
-            self.get_should_repot()
         else:
             raise ValueError("This plant does not require repotting.")
 
@@ -216,7 +217,7 @@ class Plant(AbstractPlantModel):
             if next_repot_date:
                 should_repot = date.today() >= next_repot_date
         self.should_repot = should_repot
-        self.save()
+        self.save(force_checks=False)
         return should_repot
 
     def get_next_repotting_date(self):
@@ -228,5 +229,5 @@ class Plant(AbstractPlantModel):
                 season=self.repotting_season, date=self.last_repotted
             )
         self.next_repotting_date = next_repotting_date
-        self.save()
+        self.save(force_checks=False)
         return next_repotting_date
