@@ -87,7 +87,7 @@ class OpenAIClient:
                         "role": "system",
                         "content": "You're a plant expert, designed to help users to take care of their plants. "
                                    f"You can recognize plants provided by the user and ONLY answer with the common name "
-                                   f"of the plant (in {self.default_language})."
+                                   f"of the plant in {self.default_language}. Try to keep it short and non-technical."
                                    "If you can't recognize the plant, you should only answer with 'unknown'"
                     },
                     {
