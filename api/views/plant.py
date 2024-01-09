@@ -9,6 +9,7 @@ from ai.service import PlantAIService
 from ai.tasks import get_ai_plant_answer_task
 from api.serializers.ai_plant_answer import AIPlantAnswerSerializer
 from api.serializers.plant import PlantSerializer
+from api.utils import CustomPagination
 from pyPlants.models import Plant
 
 
@@ -31,6 +32,7 @@ class PlantFilter(dj_filters.FilterSet):
 
 class PlantModelViewSet(viewsets.ModelViewSet):
     serializer_class = PlantSerializer
+    pagination_class = CustomPagination
     filter_backends = [dj_filters.DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = PlantFilter
     search_fields = ('name', 'description')
@@ -86,3 +88,12 @@ class PlantModelViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except ValueError as err:
             return Response(data={'error': str(err)}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(methods=['get'], detail=False)
+    def next_needs_care(self, request):
+        queryset = self.get_queryset()
+        plant = queryset.filter(needs_care=True).first()
+        data = dict(plant=None)
+        if plant:
+            data['plant'] = plant.id
+        return Response(data, status=status.HTTP_200_OK)
