@@ -67,12 +67,13 @@ In a new terminal window, run the celery worker:
 ```bash
 python -m celery -A pyPlants worker -l info
 ```
-### 7. Seed the database
+### Seed the database
 To seed the database with some data, run:
 ```bash
 python manage.py gen_db
 ```
-### 8. Testing
+See the [gen_db.py](https://github.com/valentindegrange/WizPlant-BE/blob/main/pyPlants/management/commands/gen_db.py) file for details of what is seeded (user / plants).
+### Testing
 To run the tests, run:
 ```bash
 python manage.py test
@@ -82,7 +83,7 @@ To check coverage, run:
 coverage run --source='.' manage.py test
 coverage report
 ```
-### 9. API Authentication
+### API Authentication
 EDIT: For the sake of speed, we're using a simple JSON Web Token (JWT) authentication system.
 User should login using their email/pwd and get a token in return.
 - `POST /api/token/ {email, password}` -> `{access_token, refresh_token}`
