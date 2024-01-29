@@ -68,7 +68,7 @@ class PlantUser(AbstractBaseUser, PermissionsMixin, AbstractPlantModel):
         return self.full_name
 
     def has_reached_max_ai_usage(self):
-        max_usage = settings.MAX_USAGE
+        max_usage = settings.MAX_OPEN_API_USAGE
         if self.is_staff:
             return False
         return self.current_ai_usage() >= max_usage
