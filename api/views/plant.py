@@ -86,7 +86,7 @@ class PlantModelViewSet(viewsets.ModelViewSet):
             ai_plant_answer = ai_service.ai_plant_answer
             serializer = AIPlantAnswerSerializer(ai_plant_answer, many=False)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except ValueError as err:
+        except Exception as err:
             return Response(data={'error': str(err)}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['get'], detail=False)

@@ -17,3 +17,6 @@ class AIPlantAnswer(AbstractPlantModel):
     image = models.ImageField(null=True, blank=True, upload_to=plant_logos_directory_path)
     is_checking_image = models.BooleanField(default=False)
     is_generating_image = models.BooleanField(default=False)
+
+    def user(self):
+        return self.plant.user.email

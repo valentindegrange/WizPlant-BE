@@ -215,6 +215,9 @@ SIMPLE_JWT = {
     'TOKEN_TYPE_CLAIM': 'token_type',
 }
 
+# maximum number of OPEN AI usage (up to 3 usage per plant) per user
+MAX_OPEN_API_USAGE = 50
+
 # OAUTH2_PROVIDER = {
 #     'SCOPES': {'read': 'Read scope', 'write': 'Write scope'}
 # }

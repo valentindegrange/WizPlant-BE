@@ -3,7 +3,7 @@ from ai.models import AIPlantAnswer
 
 
 class AIPlantAnswerAdmin(admin.ModelAdmin):
-    list_display = ('id', 'plant', 'status', 'created', 'error_message')
+    list_display = ('id', 'user', 'plant', 'status', 'created', 'error_message')
     list_filter = ('status', 'plant__name')
     search_fields = ('plant__name', 'error_message')
 

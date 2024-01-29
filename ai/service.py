@@ -17,6 +17,8 @@ class PlantAIService:
         user = self.plant.user
         if not user.has_ai_enabled:
             raise PermissionError('User does not have AI enabled')
+        if user.has_reached_max_ai_usage():
+            raise PermissionError('User has reached max AI usage (50)')
         self.client = OpenAIClient(default_language=user.get_default_language_display())
 
         if not ai_plant_answer:

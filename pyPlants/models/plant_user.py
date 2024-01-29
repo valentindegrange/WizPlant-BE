@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.base_user import BaseUserManager, AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
@@ -65,3 +66,13 @@ class PlantUser(AbstractBaseUser, PermissionsMixin, AbstractPlantModel):
 
     def __str__(self):
         return self.full_name
+
+    def has_reached_max_ai_usage(self):
+        max_usage = settings.MAX_USAGE
+        if self.is_staff:
+            return False
+        return self.current_ai_usage() >= max_usage
+
+    def current_ai_usage(self):
+        from ai.models import AIPlantAnswer
+        return AIPlantAnswer.objects.filter(plant__user=self).count()
