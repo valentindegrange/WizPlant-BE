@@ -7,7 +7,7 @@ import os
 class OpenAIClient:
     def __init__(self, default_language=None):
         self.client = OpenAI()
-        self.default_model = 'gpt-4-1106-preview'
+        self.default_model = 'gpt-4-turbo-preview'
         self.vision_model = 'gpt-4-vision-preview'
         self.image_generation_model = 'dall-e-3'
         if not default_language:
