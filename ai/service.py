@@ -1,3 +1,5 @@
+import logging
+
 from ai.client import OpenAIClient
 from pyPlants.constants import Seasons
 from pyPlants.models import Plant
@@ -8,11 +10,15 @@ from django.core.files.base import ContentFile
 from celery import shared_task
 
 
+logger = logging.getLogger(__name__)
+
+
 class PlantAIService:
     """
     Class that manages OpenAI plant recognition and instructions generation.
     """
     def __init__(self, plant: Plant, ai_plant_answer: AIPlantAnswer = None):
+        logger.info(f'Initializing AI service for plant {plant.id}')
         self.plant = plant
         user = self.plant.user
         if not user.has_ai_enabled:
@@ -39,6 +45,7 @@ class PlantAIService:
         if not self.has_plant_image:
             self.ai_plant_answer.is_generating_image = True
             self.ai_plant_answer.save()
+        logger.info(f'AI service initialized for plant {plant.id}')
 
     def get_ai_plant_answer(self):
         """
@@ -55,16 +62,24 @@ class PlantAIService:
         try:
             # try to get plant name from image
             if not self.has_plant_name:
+                logger.info(f'Plant {self.plant.id} does not have name, trying to get it from image')
                 response = self.client.plant_recognizer(self.plant.image.path)
+                logger.info(f'Plant {self.plant.id} image recognition response: {response}')
                 decoded_response = self.client.decode_response(response)
+                logger.info(f'Plant {self.plant.id} image recognition decoded response: {decoded_response}')
                 if 'unknown' in decoded_response:
+                    logger.info(f'Plant {self.plant.id} could not be recognized from image')
                     raise ValueError('Plant could not be recognized from image')
                 plant_name = decoded_response
             # get plants instructions
+            logger.info(f'Getting plant instructions for {plant_name}')
             response = self.client.plant_checker(plant_name)
+            logger.info(f'Plant instructions response: {response}')
             decoded_response = self.client.decode_json_response(response)
+            logger.info(f'Plant instructions decoded response: {decoded_response}')
             # check if response is valid
             if 'error' in decoded_response:
+                logger.info(f'Plant name {plant_name} could not be recognized')
                 raise ValueError('Plant name could not be recognized')
             # check if response is properly formatted
             if not PlantCheckerAnswer.is_json_valid(decoded_response):
